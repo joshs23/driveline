@@ -1,14 +1,13 @@
 {
   "private": true,
-  "packageManager": "pnpm@8.2.0",
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "start": "next dev --turbo",
     "lint": "next lint",
     "lint-staged": "lint-staged",
     "prettier": "prettier --write --ignore-unknown .",
     "prettier:check": "prettier --check --ignore-unknown .",
-    "start": "next start",
+    "preview": "next start",
     "test": "pnpm prettier:check && pnpm lint"
   },
   "git": {
@@ -18,35 +17,35 @@
     "*": "prettier --write --ignore-unknown"
   },
   "dependencies": {
-    "@heroicons/react": "2.1.3",
+    "@heroicons/react": "2.2.0",
     "clsx": "2.1.1",
-    "date-fns": "3.6.0",
+    "date-fns": "4.1.0",
     "dinero.js": "2.0.0-alpha.10",
     "ms": "3.0.0-canary.1",
-    "next": "15.0.0-canary.193",
-    "react": "19.0.0-rc-cd22717c-20241013",
-    "react-dom": "19.0.0-rc-cd22717c-20241013",
+    "next": "15.0.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "server-only": "0.0.1",
-    "styled-components": "6.1.8",
+    "styled-components": "6.1.13",
     "use-count-up": "3.0.1",
-    "vercel": "34.0.0"
+    "vercel": "39.0.4"
   },
   "devDependencies": {
-    "@tailwindcss/forms": "0.5.7",
-    "@tailwindcss/typography": "0.5.12",
+    "@tailwindcss/forms": "0.5.9",
+    "@tailwindcss/typography": "0.5.15",
     "@types/ms": "0.7.34",
-    "@types/node": "20.12.7",
+    "@types/node": "22.9.0",
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "@vercel/git-hooks": "1.0.0",
-    "autoprefixer": "10.4.19",
-    "eslint": "9.0.0",
-    "eslint-config-next": "14.2.2",
-    "lint-staged": "15.2.2",
-    "postcss": "8.4.38",
-    "prettier": "3.2.5",
-    "prettier-plugin-tailwindcss": "0.5.14",
-    "tailwindcss": "3.4.3",
-    "typescript": "5.4.5"
+    "autoprefixer": "10.4.20",
+    "eslint": "9.15.0",
+    "eslint-config-next": "15.0.3",
+    "lint-staged": "15.2.10",
+    "postcss": "8.4.49",
+    "prettier": "3.3.3",
+    "prettier-plugin-tailwindcss": "0.6.8",
+    "tailwindcss": "3.4.15",
+    "typescript": "5.6.3"
   }
 }
