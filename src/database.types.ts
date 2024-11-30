@@ -1,3 +1,5 @@
+import { UUID } from "crypto"
+
 export type Database = {
   public: {
     Tables: {
@@ -81,6 +83,44 @@ export type Database = {
             referencedRelation: "Post"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      UserProfile: {
+        Row: {
+          id: number
+          user_id: UUID
+          username: string
+          display_name: string
+          profile_picture_url: string | null
+          banner_url: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          user_id: UUID
+          username: string
+          display_name: string
+          profile_picture_url?: string | null
+          banner_url?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          user_id?: UUID
+          username?: string
+          display_name?: string
+          profile_picture_url?: string | null
+          banner_url?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "UserProfile_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "auth.users"
+            referencedColumns: ["id"]
+          }
         ]
       }
       Vehicle: {
