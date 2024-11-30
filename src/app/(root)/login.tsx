@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 
-export default function Login() {
+export default function Login({ onLoginSuccess }: { onLoginSuccess: () => void }) {
   const supabase = createClient();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,7 +16,7 @@ export default function Login() {
       setError(error.message);
     } else {
       setError(null);
-      window.location.href = '/'; // Redirect to home page
+      onLoginSuccess();
     }
   };
 
@@ -27,7 +27,7 @@ export default function Login() {
       setError(error.message);
     } else {
       setError(null);
-      window.location.href = '/'; // Redirect to home page
+      onLoginSuccess();
     }
   };
 
