@@ -1,12 +1,10 @@
 'use client';
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/utils/supabase/client";
 import { useAuth } from "../hooks/useAuth";
-import { useRouter } from 'next/navigation';
 
 export default function Login({ onLoginSuccess }: { onLoginSuccess: () => void }) {
-  const router = useRouter();
-  const { isLoggedIn, loading } = useAuth();
+  const {loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
@@ -48,7 +46,7 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess: () => void }
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex flex-col items-center justify-center">
       <form onSubmit={isLogin ? handleLogin : handleRegister} className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm">
         <h2 className="text-2xl mb-4">{isLogin ? 'Login' : 'Register'}</h2>
         {error && <p className="text-red-500 mb-4">{error}</p>}
