@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Feed from "./feed";
-import Login from "./login";
+import Login from "../login/page";
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
