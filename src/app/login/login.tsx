@@ -1,10 +1,10 @@
 'use client';
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/utils/supabase/client";
 import { useAuth } from "../hooks/useAuth";
 
 export default function Login({ onLoginSuccess }: { onLoginSuccess: () => void }) {
-  const { isLoggedIn, loading } = useAuth();
+  const {loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');

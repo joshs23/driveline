@@ -32,7 +32,7 @@ export default function Feed() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase]);
+  }, []);
 
   console.log(posts);
 
