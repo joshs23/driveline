@@ -1,31 +1,22 @@
-'use client';
-
-import { useEffect } from "react";
-import { useRouter } from 'next/router';
-import { useAuth } from "../hooks/useAuth";
+import { redirect } from "next/navigation";
 import Login from "../login/login";
+import { createClient } from "@/utils/supabase/server";
 
-export default function LoginPage() {
-    const { isLoggedIn, loading } = useAuth();
-    const router = useRouter();
+export default async function Page() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.getUser();
 
-    useEffect(() => {
-        if (isLoggedIn) {
-            router.push('/');
-        }
-    }, [isLoggedIn, router]);
-
-    const handleLoginSuccess = () => {
-        router.push('/');
-    };
-
-    if (loading) {
-        return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
-    }
-
-    return (
-        <main className="flex items-center justify-center bg-purple-200 w-full min-h-screen">
-            <Login onLoginSuccess={handleLoginSuccess} />
-        </main>
+  if (data?.user) {
+    console.log(
+      "We're already logged in so why are we even here?",
+      data.user.id,
     );
+    redirect("/");
+  }
+
+  return (
+    <main className="flex min-h-screen w-full items-center justify-center">
+      <Login />
+    </main>
+  );
 }
