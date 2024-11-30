@@ -1,19 +1,19 @@
 'use client';
 
-import { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
 import MyProfile from "./myprofile";
-import Login from "../login/page";
+import Login from "../login/login";
 
 export default function Home() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const {isLoggedIn, loading} = useAuth();
 
-  const handleLoginSuccess = () => {
-    setIsLoggedIn(true);
-  };
+if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
 
   return (
     <main className="flex items-center justify-center bg-purple-200 w-full min-h-screen">
-      {isLoggedIn ? <MyProfile /> : <Login onLoginSuccess={handleLoginSuccess} />}
+      {isLoggedIn ? <MyProfile /> : <Login onLoginSuccess={() => {}} />}
     </main>
   );
 }
