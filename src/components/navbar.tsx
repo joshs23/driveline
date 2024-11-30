@@ -22,6 +22,7 @@ const routes = [
   { name: "Marketplace", href: "/marketplace" },
   { name: "Following", href: "/following" },
   { name: "New Post", href: "/newpost" },
+  { name: "My Vehicles", href: "/vehicles" },
 ];
 
 async function UserButton() {
