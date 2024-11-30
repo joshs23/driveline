@@ -1,11 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
-import { createClient } from "@/utils/supabase/client";
+import { supabase } from "@/utils/supabase/client";
 import { Database } from "@/database.types";
 
 async function fetchPosts() {
-  const { data, error } = await createClient().from("Post").select("*");
+  const { data, error } = await supabase.from("Post").select("*");
   if (error) {
     console.log(error);
   }
@@ -13,7 +13,6 @@ async function fetchPosts() {
 }
 
 export default function Feed() {
-  const supabase = createClient();
   const [posts, setPosts] = useState<Database["public"]["Tables"]["Post"]["Insert"][]>([]);
   const router = useRouter();
 
