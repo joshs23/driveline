@@ -21,6 +21,7 @@ const routes = [
   { name: "Communities", href: "/communities" },
   { name: "Marketplace", href: "/marketplace" },
   { name: "Following", href: "/following" },
+  { name: "New Post", href: "/newpost" },
 ];
 
 async function UserButton() {
