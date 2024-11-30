@@ -53,7 +53,7 @@ export default function MyVehicles() {
   if (!vehicles || vehicles.length === 0) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-100">
-        <p className="text-xl text-gray-800">You don't have any vehicles listed.</p>
+        <p className="text-xl text-gray-800">You don&apos;t have any vehicles listed.</p>
       </div>
     );
   }
