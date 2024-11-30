@@ -1,122 +1,148 @@
-'use client';
-import { useState, useEffect } from "react";
-import { supabase } from "@/utils/supabase/client";
-import { useAuth } from "../hooks/useAuth";
-import { useRouter } from 'next/navigation';
+"use client";
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { redirect } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 
-export default function Login({ onLoginSuccess }: { onLoginSuccess: () => void }) {
-  const router = useRouter();
-  const { isLoggedIn, loading } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [isLogin, setIsLogin] = useState(true);
+const formSchema = z.object({
+  email: z.string(),
+  password: z.string(),
+});
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setError(error.message);
+// Registration will all happen on a different route called /signup, we don't need both of these flows to be handled in the same place, for simplicty
+/* const handleRegister = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const { data: authData, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+  if (error) {
+    setError(error.message);
+  } else if (authData.user) {
+    const { error: profileError } = await supabase.from("UserProfile").insert([
+      {
+        user_id: authData.user
+          .id as `${string}-${string}-${string}-${string}-${string}`,
+        username,
+        display_name: displayName,
+      },
+    ]);
+    if (profileError) {
+      setError(profileError.message);
     } else {
       setError(null);
-      onLoginSuccess();
+      //onLoginSuccess();
     }
-  };
+  }
+}; */
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const { data: authData, error } = await supabase.auth.signUp({ email, password });
+export default function Login() {
+  const [error, setError] = useState<string>();
+  const [loading, setLoading] = useState(false);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setLoading(true);
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: values.email,
+      password: values.password,
+    });
+
     if (error) {
       setError(error.message);
-    } else if (authData.user) {
-      const { error: profileError } = await supabase
-        .from('UserProfile')
-        .insert([{ user_id: authData.user.id as `${string}-${string}-${string}-${string}-${string}`, username, display_name: displayName }]);
-      if (profileError) {
-        setError(profileError.message);
-      } else {
-        setError(null);
-        onLoginSuccess();
-      }
+    } else if (data.user) {
+      setError(undefined);
+      redirect("/");
     }
-  };
 
-  if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    setLoading(false);
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <form onSubmit={isLogin ? handleLogin : handleRegister} className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm">
-        <h2 className="text-2xl mb-4">{isLogin ? 'Login' : 'Register'}</h2>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            required
-          />
-        </div>
-        {!isLogin && (
-          <>
-            <div className="mb-4">
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700">Username</label>
-              <input
-                type="text"
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="displayName" className="block text-sm font-medium text-gray-700">Display Name</label>
-              <input
-                type="text"
-                id="displayName"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                required
-              />
-            </div>
-          </>
-        )}
-        <button
-          type="submit"
-          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          {isLogin ? 'Login' : 'Register'}
-        </button>
-        <p className="mt-4 text-sm">
-          {isLogin ? "Don't have an account?" : "Already have an account?"}
-          <button
-            type="button"
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-indigo-600 hover:underline ml-1"
-          >
-            {isLogin ? 'Register' : 'Login'}
-          </button>
-        </p>
-      </form>
+    <div className="flex min-h-screen flex-col items-center justify-center">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <Card className="mx-auto max-w-sm">
+            <CardHeader>
+              <CardTitle className="text-2xl">Login</CardTitle>
+              <CardDescription>
+                Enter your email below to login to your account
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4">
+                {error && <p className="text-red-500">{error}</p>}
+
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="m@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full">
+                  Login
+                </Button>
+              </div>
+              <div className="mt-4 text-center text-sm">
+                Don&apos;t have an account?{" "}
+                <Link href="#" className="underline">
+                  Sign up
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </form>
+      </Form>
     </div>
   );
 }
