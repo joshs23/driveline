@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from "@/utils/supabase/client";
+import ProfileCard from './profilecard';
 
 export default function MyProfile() {
   const [profile, setProfile] = useState<{ display_name: string; username: string } | null>(null);
@@ -38,16 +39,8 @@ export default function MyProfile() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <h1 className="text-3xl font-bold mb-4">My Profile</h1>
-      {profile ? (
-        <>
-          <p className="text-xl mb-2">Display Name: {profile.display_name}</p>
-          <p className="text-xl">Username: {profile.username}</p>
-        </>
-      ) : (
-        <p>No profile information available.</p>
-      )}
+    <div className="flex flex-col items-center justify-center">
+      <ProfileCard username={profile?.username ?? ''} display_name={profile?.display_name ?? ''} />
     </div>
   );
 }
