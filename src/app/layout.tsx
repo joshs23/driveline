@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
+import Providers from "./providers";
 import "./globals.css";
 
 /*
@@ -23,7 +24,8 @@ export default async function RootLayout({
         className={`${GeistSans.className} antialiased`}
         suppressHydrationWarning
       >
-        <div className="flex min-h-screen flex-nowrap gap-1">{children}</div>
+        <Providers>
+        </Providers>
       </body>
     </html>
   );
