@@ -1,17 +1,18 @@
-'use client'
-
-import { FC } from "react";
-import { useParams } from "next/navigation";
 import UserPage from "./userpage";
 
-const ProfilePage: FC = () => {
-  const { username } = useParams() as { username: string };
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ username: string | undefined }>;
+}) {
+  const { username } = await params;
+  console.log(params);
 
   if (!username) {
     return (
-      <main className="flex min-h-screen w-full items-center justify-center">
-        <div>No username found in the route.</div>
-      </main>
+      <div className="flex min-h-screen w-full items-center justify-center">
+        No username found in the route.
+      </div>
     );
   }
 
@@ -20,6 +21,4 @@ const ProfilePage: FC = () => {
       <UserPage username={username} />
     </main>
   );
-};
-
-export default ProfilePage;
+}
