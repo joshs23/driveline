@@ -1,4 +1,4 @@
-import UserPage from "./userpage";
+import UserPage from "./user-page";
 
 export default async function Page({
   params,
@@ -6,15 +6,13 @@ export default async function Page({
   params: Promise<{ username: string | undefined }>;
 }) {
   const { username } = await params;
-  console.log(params);
 
-  if (!username) {
+  if (!username)
     return (
       <div className="flex min-h-screen w-full items-center justify-center">
         No username found in the route.
       </div>
     );
-  }
 
   return (
     <main className="flex min-h-screen w-full items-center justify-center">

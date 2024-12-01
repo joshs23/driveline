@@ -30,7 +30,7 @@ export default function UserPage({ username }: { username: string }) {
   useEffect(() => {
     async function fetchData() {
       const data = await getUserDetails(username);
-      setUserDetails(data ? data[0] : null); // Assuming the API returns an array
+      setUserDetails(data ? data[0] : null);
       setLoading(false);
     }
     fetchData();
