@@ -1,175 +1,173 @@
-import { UUID } from "crypto"
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
 
 export type Database = {
   public: {
     Tables: {
       Community: {
         Row: {
-          created_at: string
-          description: string | null
-          id: number
-          name: string
-        }
+          created_at: string;
+          description: string | null;
+          id: number;
+          name: string;
+        };
         Insert: {
-          created_at?: string
-          description?: string | null
-          id?: number
-          name: string
-        }
+          created_at?: string;
+          description?: string | null;
+          id?: number;
+          name: string;
+        };
         Update: {
-          created_at?: string
-          description?: string | null
-          id?: number
-          name?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          description?: string | null;
+          id?: number;
+          name?: string;
+        };
+        Relationships: [];
+      };
       Post: {
         Row: {
-          body: string
-          community: number | null
-          created_at: string
-          creator: string
-          id: number
-        }
+          body: string;
+          community: number | null;
+          created_at: string;
+          creator: string;
+          id: number;
+        };
         Insert: {
-          body: string
-          community?: number | null
-          created_at?: string
-          creator: string
-          id?: number
-        }
+          body: string;
+          community?: number | null;
+          created_at?: string;
+          creator: string;
+          id?: number;
+        };
         Update: {
-          body?: string
-          community?: number | null
-          created_at?: string
-          creator?: string
-          id?: number
-        }
+          body?: string;
+          community?: number | null;
+          created_at?: string;
+          creator?: string;
+          id?: number;
+        };
         Relationships: [
           {
-            foreignKeyName: "Post_community_fkey"
-            columns: ["community"]
-            isOneToOne: false
-            referencedRelation: "Community"
-            referencedColumns: ["id"]
+            foreignKeyName: "Post_community_fkey";
+            columns: ["community"];
+            isOneToOne: false;
+            referencedRelation: "Community";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       PostImage: {
         Row: {
-          created_at: string
-          id: number
-          image_url: string
-          post: number
-        }
+          created_at: string;
+          id: number;
+          image_url: string;
+          post: number;
+        };
         Insert: {
-          created_at?: string
-          id?: number
-          image_url: string
-          post: number
-        }
+          created_at?: string;
+          id?: number;
+          image_url: string;
+          post: number;
+        };
         Update: {
-          created_at?: string
-          id?: number
-          image_url?: string
-          post?: number
-        }
+          created_at?: string;
+          id?: number;
+          image_url?: string;
+          post?: number;
+        };
         Relationships: [
           {
-            foreignKeyName: "PostImage_post_fkey"
-            columns: ["post"]
-            isOneToOne: false
-            referencedRelation: "Post"
-            referencedColumns: ["id"]
+            foreignKeyName: "PostImage_post_fkey";
+            columns: ["post"];
+            isOneToOne: false;
+            referencedRelation: "Post";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       UserProfile: {
         Row: {
-          id: number
-          user_id: UUID
-          username: string
-          display_name: string
-          profile_picture_url: string | null
-          banner_url: string | null
-          created_at: string
-        }
+          banner_url: string | null;
+          created_at: string;
+          display_name: string;
+          id: number;
+          profile_picture_url: string | null;
+          user_id: string;
+          username: string;
+        };
         Insert: {
-          id?: number
-          user_id: UUID
-          username: string
-          display_name: string
-          profile_picture_url?: string | null
-          banner_url?: string | null
-          created_at?: string
-        }
+          banner_url?: string | null;
+          created_at?: string;
+          display_name: string;
+          id?: number;
+          profile_picture_url?: string | null;
+          user_id: string;
+          username: string;
+        };
         Update: {
-          id?: number
-          user_id?: UUID
-          username?: string
-          display_name?: string
-          profile_picture_url?: string | null
-          banner_url?: string | null
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "UserProfile_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "auth.users"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
+          banner_url?: string | null;
+          created_at?: string;
+          display_name?: string;
+          id?: number;
+          profile_picture_url?: string | null;
+          user_id?: string;
+          username?: string;
+        };
+        Relationships: [];
+      };
       Vehicle: {
         Row: {
-          color: string | null
-          created_at: string
-          id: number
-          make: string
-          model: string
-          owner: string | null
-          year: number
-        }
+          color: string | null;
+          created_at: string;
+          id: number;
+          make: string;
+          model: string;
+          owner: string | null;
+          year: number;
+        };
         Insert: {
-          color?: string | null
-          created_at?: string
-          id?: number
-          make: string
-          model: string
-          owner?: string | null
-          year: number
-        }
+          color?: string | null;
+          created_at?: string;
+          id?: number;
+          make: string;
+          model: string;
+          owner?: string | null;
+          year: number;
+        };
         Update: {
-          color?: string | null
-          created_at?: string
-          id?: number
-          make?: string
-          model?: string
-          owner?: string | null
-          year?: number
-        }
-        Relationships: []
-      }
-    }
+          color?: string | null;
+          created_at?: string;
+          id?: number;
+          make?: string;
+          model?: string;
+          owner?: string | null;
+          year?: number;
+        };
+        Relationships: [];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Enums: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type PublicSchema = Database[Extract<keyof Database, "public">];
 
 export type Tables<
   PublicTableNameOrOptions extends
@@ -182,7 +180,7 @@ export type Tables<
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
@@ -190,11 +188,11 @@ export type Tables<
         PublicSchema["Views"])
     ? (PublicSchema["Tables"] &
         PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-        Row: infer R
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
@@ -205,17 +203,17 @@ export type TablesInsert<
     : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
     ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Insert: infer I
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
@@ -226,17 +224,17 @@ export type TablesUpdate<
     : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
     ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Update: infer U
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   PublicEnumNameOrOptions extends
@@ -249,14 +247,14 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
-    : never
+    : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof PublicSchema["CompositeTypes"]
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof Database;
   }
     ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
@@ -264,4 +262,4 @@ export type CompositeTypes<
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
     ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+    : never;
