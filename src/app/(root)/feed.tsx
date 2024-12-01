@@ -46,7 +46,7 @@ export default function Feed({
     return () => {
       supabase.removeChannel(channel);
     };
-  });
+  }, []);
 
   if (!posts || posts.length === 0)
     return (
