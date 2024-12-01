@@ -25,6 +25,7 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <Providers>
+          <div className="flex min-h-screen flex-nowrap">{children}</div>
         </Providers>
       </body>
     </html>
