@@ -9,14 +9,15 @@ async function fetchPosts() {
   if (error) {
     console.log(error);
   }
-  return data as Database["public"]["Tables"]["Post"]["Insert"][];
-}
-
-export default function Feed() {
+export default function Feed({
+  initalPosts,
+}: {
+  initalPosts: Database["public"]["Tables"]["Post"]["Row"][] | null;
+}) {
   const supabase = createClient();
   const [posts, setPosts] = useState<
-    Database["public"]["Tables"]["Post"]["Insert"][]
-  >([]);
+    Database["public"]["Tables"]["Post"]["Row"][]
+  >(initalPosts || []);
 
   useEffect(() => {
     fetchPosts().then((posts) => {
