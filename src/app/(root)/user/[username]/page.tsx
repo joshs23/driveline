@@ -1,4 +1,6 @@
 import UserPage from "./user-page";
+import Vehicles from "./vehicles";
+import CreateVehicle from "./createvehicle";
 
 export default async function Page({
   params,
@@ -15,8 +17,9 @@ export default async function Page({
     );
 
   return (
-    <main className="flex min-h-screen w-full items-center justify-center">
+    <main className="w-full flex-auto justify-center items-center min-h-screen bg-gray-100">
       <UserPage username={username} />
+      <Vehicles username={username} />
     </main>
   );
 }

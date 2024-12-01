@@ -55,7 +55,7 @@ export default function UserPage({ username }: { username: string }) {
   const { display_name, profile_picture_url, banner_url } = userDetails;
 
   return (
-    <div className="min-h-screen w-full bg-gray-100">
+    <div className="w-full bg-gray-100">
       {/* Header Section */}
       <div className="relative h-48 w-full sm:h-64">
         {banner_url ? (
