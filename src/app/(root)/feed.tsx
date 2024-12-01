@@ -20,7 +20,7 @@ function FeedPost({
     data: authorData,
     error,
   } = useQuery({
-    queryKey: ["author_id"],
+    queryKey: ["author_id", post.creator],
     queryFn: async () => {
       const supabase = createClient();
       const { data, error } = await supabase
@@ -52,17 +52,17 @@ function FeedPost({
     >
       <div className="flex items-center gap-2">
         {authorData ? (
-            <Link href={`/user/${authorData.username}`} passHref>
+          <Link href={`/user/${authorData.username}`} passHref>
               <Avatar>
-                <AvatarImage
-                  src={authorData?.profile_picture_url as string | undefined}
-                  alt="Avatar"
-                />
-                <AvatarFallback className="bg-neutral-200">
-                  {authorData?.display_name.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-            </Link>
+              <AvatarImage
+                src={authorData?.profile_picture_url as string | undefined}
+                alt="Avatar"
+              />
+              <AvatarFallback className="bg-neutral-200">
+                {authorData?.display_name.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
         ) : (
           <Skeleton className="h-10 w-10 rounded-full" />
         )}
