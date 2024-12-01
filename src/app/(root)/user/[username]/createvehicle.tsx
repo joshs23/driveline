@@ -2,6 +2,14 @@
 import { useEffect, useState } from "react";
 import { Database } from "@/database.types";
 import { createClient } from "@/utils/supabase/client";
+import { LoaderCircle, Plus } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 async function getUser() {
   const supabase = await createClient();
@@ -39,6 +47,7 @@ async function insertVehicle(vehicle: {
 }
 
 export default function CreateVehicle() {
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [vehicle, setVehicle] = useState({
     make: "",
     model: "",
@@ -57,100 +66,103 @@ export default function CreateVehicle() {
   };
 
   return (
-    <div className="flex w-full items-center justify-center bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-md"
-      >
-        <h1 className="mb-4 text-2xl font-bold text-gray-800">
-          Add a New Vehicle
-        </h1>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <DialogTrigger asChild>
+        <Plus className="size-10 rounded-full bg-primary p-2 text-primary-foreground shadow-md" />
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="scroll-m-20 text-xl font-extrabold tracking-tight lg:text-2xl">
+            Add a New Vehicle
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Make Field */}
+          <div>
+            <label
+              htmlFor="make"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Make <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="make"
+              value={vehicle.make}
+              onChange={(e) => setVehicle({ ...vehicle, make: e.target.value })}
+              placeholder="Enter vehicle make"
+              className="mt-1 block w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required
+            />
+          </div>
 
-        {/* Make Field */}
-        <div className="mb-4">
-          <label
-            htmlFor="make"
-            className="block text-sm font-medium text-gray-700"
+          {/* Model Field */}
+          <div>
+            <label
+              htmlFor="model"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Model <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="model"
+              value={vehicle.model}
+              onChange={(e) => setVehicle({ ...vehicle, model: e.target.value })}
+              placeholder="Enter vehicle model"
+              className="mt-1 block w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required
+            />
+          </div>
+
+          {/* Year Field */}
+          <div>
+            <label
+              htmlFor="year"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Year <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              id="year"
+              value={vehicle.year === 0 ? "" : vehicle.year}
+              onChange={(e) =>
+                setVehicle({ ...vehicle, year: parseInt(e.target.value) || 0 })
+              }
+              placeholder="Enter vehicle year"
+              className="mt-1 block w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required
+            />
+          </div>
+
+          {/* Color Field (Optional) */}
+          <div>
+            <label
+              htmlFor="color"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Color (Optional)
+            </label>
+            <input
+              type="text"
+              id="color"
+              value={vehicle.color}
+              onChange={(e) => setVehicle({ ...vehicle, color: e.target.value })}
+              placeholder="Enter vehicle color"
+              className="mt-1 block w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full rounded-lg bg-blue-500 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-600"
           >
-            Make <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="make"
-            value={vehicle.make}
-            onChange={(e) => setVehicle({ ...vehicle, make: e.target.value })}
-            placeholder="Enter vehicle make"
-            className="mt-1 block w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
-          />
-        </div>
-
-        {/* Model Field */}
-        <div className="mb-4">
-          <label
-            htmlFor="model"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Model <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="model"
-            value={vehicle.model}
-            onChange={(e) => setVehicle({ ...vehicle, model: e.target.value })}
-            placeholder="Enter vehicle model"
-            className="mt-1 block w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
-          />
-        </div>
-
-        {/* Year Field */}
-        <div className="mb-4">
-          <label
-            htmlFor="year"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Year <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="number"
-            id="year"
-            value={vehicle.year === 0 ? "" : vehicle.year} // Show blank if 0
-            onChange={(e) =>
-              setVehicle({ ...vehicle, year: parseInt(e.target.value) || 0 })
-            }
-            placeholder="Enter vehicle year"
-            className="mt-1 block w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
-          />
-        </div>
-
-        {/* Color Field (Optional) */}
-        <div className="mb-4">
-          <label
-            htmlFor="color"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Color (Optional)
-          </label>
-          <input
-            type="text"
-            id="color"
-            value={vehicle.color}
-            onChange={(e) => setVehicle({ ...vehicle, color: e.target.value })}
-            placeholder="Enter vehicle color"
-            className="mt-1 block w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="w-full rounded-lg bg-blue-500 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-600"
-        >
-          Submit
-        </button>
-      </form>
-    </div>
+            Submit
+          </button>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

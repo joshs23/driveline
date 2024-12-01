@@ -87,7 +87,10 @@ export default function Vehicles({ username }: { username: string }) {
 
   return (
     <div className="bg-gray-100 p-6">
-      <h1 className="mb-6 text-3xl font-bold text-gray-800">Vehicles</h1>
+      <div className="flex items-center gap-x-4 mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">Vehicles</h1>
+        {myVehicles && <CreateVehicle />}
+      </div>
       <ul className="flex flex-wrap gap-4">
         {vehicles.map((vehicle, index) => (
           <li
@@ -103,9 +106,6 @@ export default function Vehicles({ username }: { username: string }) {
           </li>
         ))}
       </ul>
-      <div className="p-8">
-        {myVehicles && <CreateVehicle />}
-      </div>
     </div>
   );
 }
