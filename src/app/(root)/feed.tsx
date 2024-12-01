@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Database } from "@/database.types";
 import { createClient } from "@/utils/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -10,6 +11,37 @@ function FeedPost({
 }: {
   post: Database["public"]["Tables"]["Post"]["Row"];
 }) {
+  const {
+    isPending,
+    isError,
+    data: authorData,
+    error,
+  } = useQuery({
+    queryKey: ["author_id"],
+    queryFn: async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("UserProfile")
+        .select("*")
+        .eq("user_id", post.creator)
+        .single();
+
+      if (error) console.error("Error retrieving user details", error);
+
+      return data;
+    },
+  });
+
+  if (isError)
+    return (
+      <div
+        key={post.id}
+        className="flex w-full flex-col gap-2 border-b bg-card p-4 shadow-lg"
+      >
+        <p>Error: {error.message}</p>
+      </div>
+    );
+
   return (
     <div
       key={post.id}
