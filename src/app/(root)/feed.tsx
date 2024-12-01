@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import CreatePost from "./(components)/create-post";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link"; // Import Link component for navigation
 
 function FeedPost({
   post,
@@ -51,26 +52,32 @@ function FeedPost({
     >
       <div className="flex items-center gap-2">
         {authorData ? (
-          <Avatar>
-            <AvatarImage
-              src={authorData?.profile_picture_url as string | undefined}
-              alt="Avatar"
-            />
-            <AvatarFallback className="bg-neutral-200">
-              {authorData?.display_name.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
+            <Link href={`/user/${authorData.username}`} passHref>
+              <Avatar>
+                <AvatarImage
+                  src={authorData?.profile_picture_url as string | undefined}
+                  alt="Avatar"
+                />
+                <AvatarFallback className="bg-neutral-200">
+                  {authorData?.display_name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
         ) : (
           <Skeleton className="h-10 w-10 rounded-full" />
         )}
         <div className="flex gap-2">
           {authorData ? (
-            <p className="font-bold">{authorData?.display_name}</p>
+            <Link href={`/user/${authorData.username}`} passHref>
+              <p className="font-bold">{authorData?.display_name}</p>
+            </Link>
           ) : (
             <Skeleton className="h-4 w-40" />
           )}
           {authorData ? (
-            <p className="text-sm text-neutral-400">@{authorData?.username}</p>
+            <Link href={`/user/${authorData.username}`} passHref>
+              <p className="text-sm text-neutral-400">@{authorData?.username}</p>
+            </Link>
           ) : (
             <Skeleton className="h-4 w-20" />
           )}
