@@ -20,10 +20,6 @@ export default function Feed({
   >(initalPosts || []);
 
   useEffect(() => {
-    fetchPosts().then((posts) => {
-      setPosts(posts);
-    });
-
     const channel = supabase
       .channel("public:post")
       .on(
@@ -31,6 +27,14 @@ export default function Feed({
         { event: "*", schema: "public", table: "Post" },
         (payload) => {
           console.log(payload);
+
+          if (payload.eventType === "DELETE") {
+            setPosts((prev) =>
+              prev.filter((post) => post.id !== payload.old.id),
+            );
+            return;
+          }
+
           setPosts((prev) => [
             ...prev,
             payload.new as Database["public"]["Tables"]["Post"]["Row"],
