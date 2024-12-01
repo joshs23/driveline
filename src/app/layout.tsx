@@ -18,8 +18,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${GeistSans.className} antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${GeistSans.className} antialiased`}
+        suppressHydrationWarning
+      >
         <div className="flex min-h-screen flex-nowrap gap-1">{children}</div>
       </body>
     </html>
