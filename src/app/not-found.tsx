@@ -1,5 +1,5 @@
-import Navbar from "@/components/navbar";
-import RelationshipBar from "@/components/relationship-bar";
+import Navbar from "@/app/(root)/(components)/navbar";
+import RelationshipBar from "@/app/(root)/(components)/relationship-bar";
 import { Button } from "@/components/ui/button";
 import { House } from "lucide-react";
 import Link from "next/link";

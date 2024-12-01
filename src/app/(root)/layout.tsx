@@ -1,5 +1,5 @@
-import Navbar from "@/components/navbar";
-import RelationshipBar from "@/components/relationship-bar";
+import Navbar from "@/app/(root)/(components)/navbar";
+import RelationshipBar from "@/app/(root)/(components)/relationship-bar";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 

@@ -10,18 +10,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import SignOut from "@/app/(root)/signout";
+import SignOut from "@/app/(root)/(components)/sign-out";
 
 const routes = [
   { name: "Home", href: "/" },
   { name: "Communities", href: "/communities" },
   { name: "Marketplace", href: "/marketplace" },
   { name: "Following", href: "/following" },
-  { name: "New Post", href: "/newpost" },
   { name: "My Vehicles", href: "/vehicles" },
 ];
 
@@ -36,8 +34,8 @@ async function UserButton() {
   const { data: profileData, error: profileError } = await supabase
     .from("UserProfile")
     .select("*")
-    .eq("user_id", data?.user?.id) // Assuming the `id` in the profiles table matches the user's ID
-    .single(); // `single()` assumes only one profile exists per user
+    .eq("user_id", data?.user?.id)
+    .single();
 
   if (profileError) {
     console.error("Error fetching profile:", profileError);
