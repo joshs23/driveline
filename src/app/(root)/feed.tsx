@@ -33,7 +33,7 @@ export default function Feed({
           console.log(payload);
           setPosts((prev) => [
             ...prev,
-            payload.new as Database["public"]["Tables"]["Post"]["Insert"],
+            payload.new as Database["public"]["Tables"]["Post"]["Row"],
           ]);
         },
       )
