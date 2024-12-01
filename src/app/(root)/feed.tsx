@@ -48,7 +48,13 @@ export default function Feed({
     };
   });
 
-  console.log(posts);
+  if (!posts || posts.length === 0)
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center">
+        There are no posts yet. Create one!
+        <CreatePost />
+      </div>
+    );
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center">
