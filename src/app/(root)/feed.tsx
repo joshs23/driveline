@@ -5,6 +5,8 @@ import { Database } from "@/database.types";
 import { createClient } from "@/utils/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import CreatePost from "./(components)/create-post";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function FeedPost({
   post,
@@ -45,9 +47,36 @@ function FeedPost({
   return (
     <div
       key={post.id}
-      className="flex w-full flex-col gap-4 rounded-lg bg-card p-4"
+      className="flex w-full flex-col gap-2 border-b bg-card p-4 shadow-lg"
     >
-      <p>{post.body}</p>
+      <div className="flex items-center gap-2">
+        {authorData ? (
+          <Avatar>
+            <AvatarImage
+              src={authorData?.profile_picture_url as string | undefined}
+              alt="Avatar"
+            />
+            <AvatarFallback className="bg-neutral-200">
+              {authorData?.display_name.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+        ) : (
+          <Skeleton className="h-10 w-10 rounded-full" />
+        )}
+        <div className="flex gap-2">
+          {authorData ? (
+            <p className="font-bold">{authorData?.display_name}</p>
+          ) : (
+            <Skeleton className="h-4 w-40" />
+          )}
+          {authorData ? (
+            <p className="text-sm text-neutral-400">@{authorData?.username}</p>
+          ) : (
+            <Skeleton className="h-4 w-20" />
+          )}
+        </div>
+      </div>
+      <p className="leading-7">{post.body}</p>
     </div>
   );
 }
@@ -100,8 +129,8 @@ export default function Feed({
     );
 
   return (
-    <div className="relative flex h-screen w-full flex-col items-center justify-center">
-      <ScrollArea className="flex w-full flex-col gap-4 rounded-lg bg-card p-4">
+    <div className="relative flex h-screen w-full flex-col items-center bg-border">
+      <ScrollArea className="flex w-full flex-col bg-card">
         {posts.map((post) => (
           <FeedPost post={post} key={post.id} />
         ))}
