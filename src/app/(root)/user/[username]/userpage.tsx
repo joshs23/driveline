@@ -2,25 +2,21 @@
 import { createClient } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
 
-interface UserPageProps {
-  username: string;
-}
-
-// get user details from supabase
 const getUserDetails = async (username: string) => {
-  // connect to Supabase
   const supabase = createClient();
   const { data, error } = await supabase
     .from("UserProfile")
     .select("id, username, display_name, profile_picture_url, banner_url")
     .eq("username", username);
+
   if (error) {
     console.error("Error retrieving user details", error);
   }
+
   return data;
 };
 
-const UserPage: React.FC<UserPageProps> = ({ username }) => {
+export default function UserPage({ username }: { username: string }) {
   const [userDetails, setUserDetails] = useState<{
     id: number;
     username: string;
@@ -94,6 +90,4 @@ const UserPage: React.FC<UserPageProps> = ({ username }) => {
       </div>
     </div>
   );
-};
-
-export default UserPage;
+}
