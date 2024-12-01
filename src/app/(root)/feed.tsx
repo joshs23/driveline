@@ -5,6 +5,21 @@ import { createClient } from "@/utils/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import CreatePost from "./(components)/create-post";
 
+function FeedPost({
+  post,
+}: {
+  post: Database["public"]["Tables"]["Post"]["Row"];
+}) {
+  return (
+    <div
+      key={post.id}
+      className="flex w-full flex-col gap-4 rounded-lg bg-card p-4"
+    >
+      <p>{post.body}</p>
+    </div>
+  );
+}
+
 export default function Feed({
   initalPosts,
 }: {
@@ -55,7 +70,9 @@ export default function Feed({
   return (
     <div className="relative flex h-screen w-full flex-col items-center justify-center">
       <ScrollArea className="flex w-full flex-col gap-4 rounded-lg bg-card p-4">
-      {posts.map((post) => (
+        {posts.map((post) => (
+          <FeedPost post={post} key={post.id} />
+        ))}
       </ScrollArea>
       <CreatePost />
     </div>
