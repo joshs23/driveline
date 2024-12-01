@@ -2,12 +2,7 @@
 import { useEffect, useState } from "react";
 import { Database } from "@/database.types";
 import { createClient } from "@/utils/supabase/client";
-
-async function fetchPosts() {
-  const supabase = createClient();
-  const { data, error } = await supabase.from("Post").select("*");
-  if (error) {
-    console.log(error);
+import { ScrollArea } from "@/components/ui/scroll-area";
   }
 export default function Feed({
   initalPosts,
@@ -57,15 +52,9 @@ export default function Feed({
     );
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center">
+      <ScrollArea className="flex w-full flex-col gap-4 rounded-lg bg-card p-4">
       {posts.map((post) => (
-        <div
-          key={post.id}
-          className="flex w-full flex-col gap-4 rounded-lg bg-card p-4"
-        >
-          <p>{post.body}</p>
-        </div>
-      ))}
+      </ScrollArea>
     </div>
   );
 }
