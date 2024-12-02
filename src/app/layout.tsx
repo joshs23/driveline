@@ -21,7 +21,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${GeistSans.className} antialiased`}
+        className={`${GeistSans.className} dark antialiased`}
         suppressHydrationWarning
       >
         <Providers>
