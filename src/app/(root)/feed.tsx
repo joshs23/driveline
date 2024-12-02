@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import CreatePost from "./(components)/create-post";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link"; // Import Link component for navigation
+import Link from "next/link";
 
 function FeedPost({
   post,
@@ -57,7 +57,7 @@ function FeedPost({
                 src={authorData?.profile_picture_url as string | undefined}
                 alt="Avatar"
               />
-              <AvatarFallback className="bg-neutral-200">
+              <AvatarFallback>
                 {authorData?.display_name.charAt(0)}
               </AvatarFallback>
             </Avatar>
