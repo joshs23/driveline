@@ -22,12 +22,12 @@ import { useQuery } from "@tanstack/react-query";
     },
   });
 
+  if (isPending)
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
-        <p className="text-xl text-gray-800">Loading profile...</p>
+      <div className="flex min-h-screen w-full items-center justify-center">
+        <LoaderCircle size={32} strokeWidth={2.75} className="animate-spin" />
       </div>
     );
-  }
 
   if (!userDetails) {
     return (
