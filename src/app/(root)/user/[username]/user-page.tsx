@@ -1,6 +1,10 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { LoaderCircle } from "lucide-react";
+import { notFound } from "next/navigation";
+
+export default function UserPage({ username }: { username: string }) {
   const {
     isPending,
     isError,
@@ -9,16 +13,16 @@ import { useQuery } from "@tanstack/react-query";
   } = useQuery({
     queryKey: ["username", username],
     queryFn: async () => {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("UserProfile")
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("UserProfile")
         .select("*")
         .eq("username", username)
         .single();
 
       if (error) console.error("Error retrieving user details", error);
 
-  return data;
+      return data;
     },
   });
 
@@ -29,13 +33,7 @@ import { useQuery } from "@tanstack/react-query";
       </div>
     );
 
-  if (!userDetails) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
-        <p className="text-xl text-gray-800">User not found.</p>
-      </div>
-    );
-  }
+  if (!userDetails) notFound();
 
   const { display_name, profile_picture_url, banner_url } = userDetails;
 
