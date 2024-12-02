@@ -1,42 +1,27 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
-import { useEffect, useState } from "react";
-
-const getUserDetails = async (username: string) => {
+import { useQuery } from "@tanstack/react-query";
+  const {
+    isPending,
+    isError,
+    data: userDetails,
+    error,
+  } = useQuery({
+    queryKey: ["username", username],
+    queryFn: async () => {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("UserProfile")
-    .select("id, username, display_name, profile_picture_url, banner_url")
-    .eq("username", username);
+        .select("*")
+        .eq("username", username)
+        .single();
 
-  if (error) {
-    console.error("Error retrieving user details", error);
-  }
+      if (error) console.error("Error retrieving user details", error);
 
   return data;
-};
+    },
+  });
 
-export default function UserPage({ username }: { username: string }) {
-  const [userDetails, setUserDetails] = useState<{
-    id: number;
-    username: string;
-    display_name: string;
-    profile_picture_url: string | null;
-    banner_url: string | null;
-  } | null>(null);
-
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchData() {
-      const data = await getUserDetails(username);
-      setUserDetails(data ? data[0] : null);
-      setLoading(false);
-    }
-    fetchData();
-  }, [username]);
-
-  if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-100">
         <p className="text-xl text-gray-800">Loading profile...</p>
