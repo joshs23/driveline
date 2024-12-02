@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import CreateVehicle from "./createvehicle";
+import CreateVehicle from "./create-vehicle";
 import { Plus, X } from "lucide-react";
 import {
   Dialog,
