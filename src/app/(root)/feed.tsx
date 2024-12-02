@@ -15,7 +15,6 @@ function FeedPost({
   post: Database["public"]["Tables"]["Post"]["Row"];
 }) {
   const {
-    isPending,
     isError,
     data: authorData,
     error,
@@ -53,7 +52,7 @@ function FeedPost({
       <div className="flex items-center gap-2">
         {authorData ? (
           <Link href={`/user/${authorData.username}`} passHref>
-              <Avatar>
+            <Avatar>
               <AvatarImage
                 src={authorData?.profile_picture_url as string | undefined}
                 alt="Avatar"
@@ -76,7 +75,9 @@ function FeedPost({
           )}
           {authorData ? (
             <Link href={`/user/${authorData.username}`} passHref>
-              <p className="text-sm text-neutral-400">@{authorData?.username}</p>
+              <p className="text-sm text-neutral-400">
+                @{authorData?.username}
+              </p>
             </Link>
           ) : (
             <Skeleton className="h-4 w-20" />
