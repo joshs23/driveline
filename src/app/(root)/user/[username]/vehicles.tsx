@@ -104,7 +104,7 @@ export default function Vehicles({ username }: { username: string }) {
     }
 
     fetchData();
-  }, []);
+  }, [username]);
 
   const handleDelete = async () => {
     if (vehicleToDelete) {

@@ -26,7 +26,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { LoaderCircle } from "lucide-react";
 
-const formSchema: z.ZodObject<any> = z.object({
+const formSchema = z.object({
   email: z.string().email({ message: "Must be a valid email address." }),
   password: z
     .object({
