@@ -9,11 +9,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 
-function FeedPost({
-  post,
-}: {
-  post: Database["public"]["Tables"]["Post"]["Row"];
-}) {
+type PostWithImages = Database["public"]["Tables"]["Post"]["Row"] & {
+  PostImage: Database["public"]["Tables"]["PostImage"]["Row"][];
+};
+
+const projectId =
+  process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
+
+function FeedPost({ post }: { post: PostWithImages }) {
   const {
     isError,
     data: authorData,
@@ -85,6 +88,17 @@ function FeedPost({
         </div>
       </div>
       <p className="leading-7">{post.body}</p>
+      {post.PostImage?.length > 0 && (
+        <div className="flex w-full gap-8">
+          {post.PostImage?.map((image) => (
+            <img
+              key={image.id}
+              src={`https://${projectId}.supabase.co/storage/v1/object/public/feed/${image.image_url}`}
+              className="max-h-36 max-w-64 object-cover"
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -92,15 +106,13 @@ function FeedPost({
 export default function Feed({
   initalPosts,
 }: {
-  initalPosts: Database["public"]["Tables"]["Post"]["Row"][] | null;
+  initalPosts: PostWithImages[] | null;
 }) {
   const supabase = createClient();
-  const [posts, setPosts] = useState<
-    Database["public"]["Tables"]["Post"]["Row"][]
-  >(initalPosts || []);
+  const [posts, setPosts] = useState<PostWithImages[]>(initalPosts || []);
 
   useEffect(() => {
-    const channel = supabase
+    const postChannel = supabase
       .channel("public:post")
       .on(
         "postgres_changes",
@@ -112,21 +124,64 @@ export default function Feed({
             setPosts((prev) =>
               prev.filter((post) => post.id !== payload.old.id),
             );
-            return;
           }
 
-          setPosts((prev) => [
-            ...prev,
-            payload.new as Database["public"]["Tables"]["Post"]["Row"],
-          ]);
+          if (payload.eventType === "INSERT") {
+            console.log("New post incoming!", payload.new);
+            setPosts((prev) => [payload.new as PostWithImages, ...prev]);
+          }
+        },
+      )
+      .subscribe();
+
+    const postImageChannel = supabase
+      .channel("public:postimage")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "PostImage" },
+        (payload) => {
+          console.log(payload);
+
+          if (payload.eventType === "DELETE") {
+            setPosts((prev) =>
+              prev.map((post) => {
+                if (post.id !== payload.old.post) return post;
+
+                return {
+                  ...post,
+                  PostImage: post.PostImage.filter(
+                    (image) => image.id !== payload.old.id,
+                  ),
+                };
+              }),
+            );
+          }
+
+          if (payload.eventType === "INSERT") {
+            console.log("New image incoming!", payload.new);
+            setPosts((prev) =>
+              prev.map((post) => {
+                if (post.id !== payload.new.post) return post;
+
+                return {
+                  ...post,
+                  PostImage: [
+                    ...(post.PostImage || []),
+                    payload.new as Database["public"]["Tables"]["PostImage"]["Row"],
+                  ],
+                };
+              }),
+            );
+          }
         },
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(postChannel);
+      supabase.removeChannel(postImageChannel);
     };
-  }, []);
+  }, [supabase]);
 
   if (!posts || posts.length === 0)
     return (
