@@ -83,7 +83,7 @@ export default function CreatePost() {
     if (values.images) {
       setProgress(-1);
 
-      let fakeInterval = setInterval(
+      const fakeInterval = setInterval(
         () => {
           setProgress((oldProgress) => {
             if (oldProgress >= 98) {
