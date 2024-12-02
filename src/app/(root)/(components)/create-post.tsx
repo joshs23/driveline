@@ -79,7 +79,7 @@ export default function CreatePost() {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger>
-        <Plus className="absolute bottom-4 right-4 size-12 rounded-full bg-primary p-2 text-primary-foreground shadow-md" />
+        <Plus className="absolute bottom-4 right-4 size-12 cursor-pointer rounded-full bg-primary p-2 text-primary-foreground shadow-md transition-colors hover:bg-primary/90" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
