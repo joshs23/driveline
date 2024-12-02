@@ -1,6 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Database } from "@/database.types";
+import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { LoaderCircle, Plus } from "lucide-react";
 import {
@@ -10,9 +9,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 async function getUser() {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data, error } = await supabase.auth.getUser();
   if (error) {
     console.error("Error getting user:", error);
@@ -20,55 +33,61 @@ async function getUser() {
   return data;
 }
 
-async function insertVehicle(vehicle: {
-  make: string;
-  model: string;
-  year: number;
-  color: string;
-}) {
-  const supabase = await createClient();
+async function insertVehicle(vehicle: z.infer<typeof formSchema>) {
+  const supabase = createClient();
   const user = await getUser();
   const { data, error } = await supabase
     .from("Vehicle")
     .insert([
       {
-        owner: String(user?.user?.id),
+        owner: user?.user?.id,
         make: vehicle.make,
         model: vehicle.model,
-        year: vehicle.year,
+        year: Number(vehicle.year),
         color: vehicle.color,
       },
     ])
     .select();
-  if (error) {
-    console.error("Error inserting Vehicle:", error);
-  }
+
+  if (error) console.error("Error inserting Vehicle:", error);
+
   return data;
 }
 
+const formSchema = z.object({
+  make: z.string(),
+  model: z.string(),
+  year: z
+    .string()
+    .length(4, { message: "Invalid year, must be of format: YYYY" })
+    .refine((val) => !isNaN(Number(val)), { message: "Invalid year" }),
+  color: z.string().optional(),
+});
+
 export default function CreateVehicle() {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [vehicle, setVehicle] = useState({
-    make: "",
-    model: "",
-    year: 0,
-    color: "",
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      make: "",
+      model: "",
+      year: "",
+      color: "",
+    },
   });
 
-  // handle submit
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // insert the row
-    insertVehicle(vehicle);
-    // Reset the input after submission
-    setVehicle({ make: "", model: "", year: 0, color: "" });
-    window.location.reload();  // Just refreshing for now instead of subscribing to changes.
-  };
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values);
+    insertVehicle(values);
+    form.reset();
+    window.location.reload(); // Just refreshing for now instead of subscribing to changes.
+  }
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Plus className="size-10 rounded-full bg-primary p-2 text-primary-foreground shadow-md" />
+        <Plus className="size-10 cursor-pointer rounded-full bg-primary p-2 text-primary-foreground shadow-md transition-colors hover:bg-primary/90" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -76,92 +95,86 @@ export default function CreateVehicle() {
             Add a New Vehicle
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Make Field */}
-          <div>
-            <label
-              htmlFor="make"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Make <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="make"
-              value={vehicle.make}
-              onChange={(e) => setVehicle({ ...vehicle, make: e.target.value })}
-              placeholder="Enter vehicle make"
-              className="mt-1 block w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              required
-            />
-          </div>
 
-          {/* Model Field */}
-          <div>
-            <label
-              htmlFor="model"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Model <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="model"
-              value={vehicle.model}
-              onChange={(e) => setVehicle({ ...vehicle, model: e.target.value })}
-              placeholder="Enter vehicle model"
-              className="mt-1 block w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              required
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Make Field */}
+            <FormField
+              control={form.control}
+              name="make"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Make<span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="Dodge" required {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          {/* Year Field */}
-          <div>
-            <label
-              htmlFor="year"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Year <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              id="year"
-              value={vehicle.year === 0 ? "" : vehicle.year}
-              onChange={(e) =>
-                setVehicle({ ...vehicle, year: parseInt(e.target.value) || 0 })
-              }
-              placeholder="Enter vehicle year"
-              className="mt-1 block w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              required
+            {/* Model Field */}
+            <FormField
+              control={form.control}
+              name="model"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Model<span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="Charger" required {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          {/* Color Field (Optional) */}
-          <div>
-            <label
-              htmlFor="color"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Color (Optional)
-            </label>
-            <input
-              type="text"
-              id="color"
-              value={vehicle.color}
-              onChange={(e) => setVehicle({ ...vehicle, color: e.target.value })}
-              placeholder="Enter vehicle color"
-              className="mt-1 block w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            {/* Year Field */}
+            <FormField
+              control={form.control}
+              name="year"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Year<span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="2018"
+                      required
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-blue-500 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-600"
-          >
-            Submit
-          </button>
-        </form>
+            {/* Color Field (Optional) */}
+            <FormField
+              control={form.control}
+              name="color"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Color</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Blue" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Submit Button */}
+            <Button type="submit" className="w-full transition-colors">
+              Submit
+            </Button>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
