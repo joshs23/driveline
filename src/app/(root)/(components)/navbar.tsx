@@ -85,21 +85,21 @@ export default async function Navbar() {
           />
         </div>
 
-        <Separator className="mx-auto h-[2px] w-[60%] rounded-lg bg-primary shadow-xl" />
+        <Separator className="mx-auto h-[2px] w-[60%] rounded-lg shadow-xl" />
 
         <div className="flex w-full flex-col">
           {routes.map((route) => (
             <Link
               key={route.name}
               href={route.href}
-              className="w-full rounded-sm py-2 text-center text-xl font-medium transition-all hover:bg-primary hover:text-primary-foreground"
+              className="w-full py-2 text-center text-xl font-medium transition-all hover:bg-primary hover:text-primary-foreground"
             >
               {route.name}
             </Link>
           ))}
         </div>
 
-        <Separator className="mx-auto h-[2px] w-[60%] rounded-lg bg-primary shadow-xl" />
+        <Separator className="mx-auto h-[2px] w-[60%] rounded-lg shadow-xl" />
       </div>
 
       <Suspense
