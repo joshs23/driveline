@@ -24,6 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
+import { LoaderCircle } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string(),
@@ -130,12 +131,19 @@ export default function Login() {
                   )}
                 />
                 <Button type="submit" className="w-full">
-                  Login
+                  {(loading && (
+                    <LoaderCircle
+                      size={32}
+                      strokeWidth={2.75}
+                      className="animate-spin"
+                    />
+                  )) ||
+                    "Login"}
                 </Button>
               </div>
               <div className="mt-4 text-center text-sm">
                 Don&apos;t have an account?{" "}
-                <Link href="#" className="underline">
+                <Link href="/signup" className="underline">
                   Sign up
                 </Link>
               </div>
