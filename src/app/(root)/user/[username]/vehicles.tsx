@@ -118,13 +118,12 @@ export default function Vehicles({ username }: { username: string }) {
     setVehicleToDelete(null);
   };
 
-  if (loading) {
+  if (loading)
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="flex min-h-screen items-center justify-center">
         <p className="text-xl text-gray-800">Loading vehicles...</p>
       </div>
     );
-  }
 
   return (
     <div className="bg-gray-100 p-6">
@@ -136,9 +135,9 @@ export default function Vehicles({ username }: { username: string }) {
         {vehicles?.map((vehicle) => (
           <li
             key={vehicle.id}
-            className="relative w-fit rounded-lg border border-gray-300 bg-white p-4 shadow-md"
+              className="relative flex w-fit items-center rounded-lg border border-gray-300 bg-secondary-foreground p-4 shadow-md"
           >
-            {/* Flex container for vehicle info and delete button */}
+              <div>
             <div className="flex items-center justify-between">
               {/* Vehicle text info */}
               <div className="flex items-center">

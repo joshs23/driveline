@@ -55,9 +55,9 @@ export default function UserPage({ username }: { username: string }) {
   const { display_name, profile_picture_url, banner_url } = userDetails;
 
   return (
-    <div className="w-full bg-gray-100">
+    <div className="w-full">
       {/* Header Section */}
-      <div className="relative h-48 w-full sm:h-64">
+      <div className="relative h-48 w-full border-b border-zinc-600 sm:h-64">
         {banner_url ? (
           <img
             src={banner_url}
@@ -65,8 +65,8 @@ export default function UserPage({ username }: { username: string }) {
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gray-300">
-            <p className="text-gray-500">No Banner</p>
+          <div className="flex h-full w-full items-center justify-center bg-secondary/50">
+            <p>No Banner</p>
           </div>
         )}
         <div className="absolute -bottom-16 left-1/2 h-32 w-32 -translate-x-1/2 transform sm:h-40 sm:w-40">
@@ -85,8 +85,8 @@ export default function UserPage({ username }: { username: string }) {
       </div>
       {/* User Info Section */}
       <div className="mt-20 text-center">
-        <h1 className="text-2xl font-semibold text-gray-800">{display_name}</h1>
-        <p className="text-lg text-gray-600">@{username}</p>
+        <h1 className="text-2xl font-semibold">{display_name}</h1>
+        <p className="text-lg">@{username}</p>
       </div>
     </div>
   );
