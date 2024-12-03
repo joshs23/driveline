@@ -1,22 +1,29 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Database } from "@/database.types";
+import { Tables } from "@/database.types";
 import { createClient } from "@/utils/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import CreatePost from "./(components)/create-post";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
-type PostWithImages = Database["public"]["Tables"]["Post"]["Row"] & {
-  PostImage: Database["public"]["Tables"]["PostImage"]["Row"][];
+type PostWithImages = Tables<"Post"> & {
+  PostImage: Tables<"PostImage">[];
 };
 
 const projectId =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
 
-function FeedPost({ post }: { post: PostWithImages }) {
+function FeedPost({
+  post,
+  inline,
+}: {
+  post: PostWithImages;
+  inline?: boolean;
+}) {
   const {
     isError,
     data: authorData,
@@ -50,7 +57,10 @@ function FeedPost({ post }: { post: PostWithImages }) {
   return (
     <div
       key={post.id}
-      className="flex w-full flex-col gap-2 border-b bg-card p-4 shadow-lg"
+      className={cn(
+        !inline && "bg-card",
+        "flex w-full flex-col gap-2 border-b px-8 py-4 shadow-lg",
+      )}
     >
       <div className="flex items-center gap-2">
         {authorData ? (
@@ -105,8 +115,12 @@ function FeedPost({ post }: { post: PostWithImages }) {
 
 export default function Feed({
   initalPosts,
+  disableCreatePost,
+  inline,
 }: {
   initalPosts: PostWithImages[] | null;
+  disableCreatePost?: boolean;
+  inline?: boolean;
 }) {
   const supabase = createClient();
   const [posts, setPosts] = useState<PostWithImages[]>(initalPosts || []);
@@ -167,7 +181,7 @@ export default function Feed({
                   ...post,
                   PostImage: [
                     ...(post.PostImage || []),
-                    payload.new as Database["public"]["Tables"]["PostImage"]["Row"],
+                    payload.new as Tables<"PostImage">,
                   ],
                 };
               }),
@@ -185,20 +199,36 @@ export default function Feed({
 
   if (!posts || posts.length === 0)
     return (
-      <div className="flex min-h-screen w-full items-center justify-center">
+      <div
+        className={cn(
+          (!inline && "min-h-screen") || "max-h-full",
+          "flex w-full items-center justify-center",
+        )}
+      >
         There are no posts yet. Create one!
-        <CreatePost />
+        {!disableCreatePost && <CreatePost />}
       </div>
     );
 
   return (
-    <div className="relative flex h-screen w-full flex-col items-center bg-border">
-      <ScrollArea className="flex w-full flex-col bg-card">
+    <div
+      className={cn(
+        (!inline && "h-screen bg-border") || "h-0 grow",
+        "flex w-full flex-col items-center",
+      )}
+    >
+      <ScrollArea
+        className={cn(
+          (!inline && "bg-card") || "h-full",
+          "flex w-full flex-col",
+        )}
+      >
         {posts.map((post) => (
-          <FeedPost post={post} key={post.id} />
+          <FeedPost post={post} key={post.id} inline={inline} />
         ))}
       </ScrollArea>
-      <CreatePost />
+
+      {!disableCreatePost && <CreatePost />}
     </div>
   );
 }
