@@ -63,7 +63,7 @@ async function UserButton() {
           <Link href={`/user/${profileData.username}`}>View Profile</Link>
         </DropdownMenuItem>
         <SignOut>
-          <DropdownMenuItem className="cursor-pointer">
+          <DropdownMenuItem className="w-full cursor-pointer">
             Sign Out
           </DropdownMenuItem>
         </SignOut>
