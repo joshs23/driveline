@@ -7,6 +7,7 @@ export default function SignOut({ children }: { children: React.ReactNode }) {
 
   return (
     <button
+      className="w-full"
       onClick={async () => {
         console.log("Signing out");
         const { error } = await supabase.auth.signOut();
