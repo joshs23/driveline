@@ -12,7 +12,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -30,33 +29,6 @@ const formSchema = z.object({
   email: z.string(),
   password: z.string(),
 });
-
-// Registration will all happen on a different route called /signup, we don't need both of these flows to be handled in the same place, for simplicty
-/* const handleRegister = async (e: React.FormEvent) => {
-  e.preventDefault();
-  const { data: authData, error } = await supabase.auth.signUp({
-    email,
-    password,
-  });
-  if (error) {
-    setError(error.message);
-  } else if (authData.user) {
-    const { error: profileError } = await supabase.from("UserProfile").insert([
-      {
-        user_id: authData.user
-          .id as `${string}-${string}-${string}-${string}-${string}`,
-        username,
-        display_name: displayName,
-      },
-    ]);
-    if (profileError) {
-      setError(profileError.message);
-    } else {
-      setError(null);
-      //onLoginSuccess();
-    }
-  }
-}; */
 
 export default function Login() {
   const [error, setError] = useState<string>();
