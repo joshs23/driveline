@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import SignOut from "@/app/(root)/(components)/sign-out";
+import CreatePost from "./create-post";
 
 const routes = [
   { name: "Home", href: "/" },
@@ -100,6 +101,8 @@ export default async function Navbar() {
         </div>
 
         <Separator className="mx-auto h-[2px] w-[60%] rounded-lg shadow-xl" />
+
+        <CreatePost inFlow />
       </div>
 
       <Suspense
