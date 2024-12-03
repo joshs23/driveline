@@ -1,16 +1,110 @@
 "use client";
+import { Tables } from "@/database.types";
+import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
-import { notFound } from "next/navigation";
+import { notFound, redirect, usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+
+const projectId =
+  process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
+
+async function getCurrentUser() {
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (error) {
+    console.error("Error retrieving user details", error);
+  }
+  return data;
+}
+
+function Banner({ userDetails }: { userDetails: Tables<"UserProfile"> }) {
+  const [currentUserId, setCurrentUserId] = useState<string>();
+  //const [bannerImage, setBannerImage] = useState<File>();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const pathname = usePathname();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    getCurrentUser().then((data) => setCurrentUserId(data?.user?.id));
+  }, []);
+
+  const handleBannerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files) return;
+    //setBannerImage(event.target.files?.[0]);
+    uploadBanner(event.target.files[0]);
+  };
+
+  async function uploadBanner(bannerImage: File) {
+    if (!bannerImage) return;
+
+    const supabase = createClient();
+    const { data: imageData, error } = await supabase.storage
+      .from("avatars")
+      .upload(`${userDetails.id}/banner/${bannerImage.name}`, bannerImage, {
+        upsert: true,
+      });
+
+    if (error) {
+      console.error("Error uploading image:", error, imageData);
+      return;
+    }
+
+    if (imageData) {
+      await supabase
+        .from("UserProfile")
+        .update({
+          banner_url: imageData.path,
+        })
+        .eq("user_id", userDetails.user_id);
+    }
+
+    queryClient.invalidateQueries({
+      queryKey: ["username", userDetails.username],
+    });
+
+    redirect(pathname);
+  }
+
+  return (
+    <div
+      className={cn(
+        currentUserId &&
+          currentUserId == userDetails.user_id &&
+          "cursor-pointer",
+        "flex h-full w-full items-center justify-center bg-secondary/50",
+      )}
+      onClick={() => {
+        if (!currentUserId || currentUserId !== userDetails.user_id) return;
+        fileInputRef.current?.click();
+      }}
+    >
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleBannerChange}
+        className="hidden"
+      />
+      {userDetails.banner_url ? (
+        <>
+          <img
+            src={`https://${projectId}.supabase.co/storage/v1/object/public/avatars/${userDetails.banner_url}`}
+            alt="Banner"
+            className="h-full w-full object-cover object-center"
+          />
+        </>
+      ) : (
+        <p className="font-bold text-muted-foreground">No Banner</p>
+      )}
+    </div>
+  );
+}
+
+//somizlnspycsfofvmxjs.supabase.co/storage/v1/object/public/avatars/6/Tuning-Car-PNG-Image-File.png
 
 export default function UserPage({ username }: { username: string }) {
-  const {
-    isPending,
-    isError,
-    data: userDetails,
-    error,
-  } = useQuery({
+  const { isPending, data: userDetails } = useQuery({
     queryKey: ["username", username],
     queryFn: async () => {
       const supabase = createClient();
@@ -35,23 +129,13 @@ export default function UserPage({ username }: { username: string }) {
 
   if (!userDetails) notFound();
 
-  const { display_name, profile_picture_url, banner_url } = userDetails;
+  const { display_name, profile_picture_url } = userDetails;
 
   return (
     <div className="w-full">
       {/* Header Section */}
-      <div className="relative h-48 w-full border-b border-zinc-600 sm:h-64">
-        {banner_url ? (
-          <img
-            src={banner_url}
-            alt="Banner"
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-secondary/50">
-            <p>No Banner</p>
-          </div>
-        )}
+      <div className="relative h-[25rem] w-full border-b border-zinc-600">
+        <Banner userDetails={userDetails} />
         <div className="absolute -bottom-16 left-1/2 h-32 w-32 -translate-x-1/2 transform sm:h-40 sm:w-40">
           {profile_picture_url ? (
             <img
