@@ -24,6 +24,7 @@ import { useState } from "react";
 import { FileUpload } from "@/components/ui/file-upload";
 import { IconLoader2 } from "@tabler/icons-react";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 async function insertPost(content: string) {
   const supabase = createClient();
@@ -58,7 +59,7 @@ const formSchema = z.object({
   images: z.array(z.instanceof(File)).optional(),
 });
 
-export default function CreatePost() {
+export default function CreatePost({ inFlow }: { inFlow?: boolean }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(-1);
@@ -100,7 +101,7 @@ export default function CreatePost() {
       const imagePromises = values.images.map((image, i) => {
         const storagePromise = supabase.storage
           .from("feed")
-          .upload(`${post.id}/${image.name}_${i}.png`, image, {
+          .upload(`${post.id}/${i}_${image.name}`, image, {
             cacheControl: "3600",
             upsert: false,
           });
@@ -144,7 +145,12 @@ export default function CreatePost() {
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogTrigger className="absolute bottom-4 right-4 flex cursor-pointer items-center rounded-full bg-primary px-4 py-2 text-2xl font-bold text-primary-foreground shadow-md transition-colors hover:bg-primary/90">
+      <DialogTrigger
+        className={cn(
+          !inFlow && "absolute bottom-4 right-4",
+          "flex cursor-pointer items-center rounded-full border bg-primary/70 px-4 py-2 text-2xl font-bold text-primary-foreground shadow-md outline outline-primary-foreground transition-colors hover:bg-primary/90",
+        )}
+      >
         <Plus className="mr-2 size-8 cursor-pointer" />
         <p className="mr-2">New Post</p>
       </DialogTrigger>
