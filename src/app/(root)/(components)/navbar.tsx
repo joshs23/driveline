@@ -18,8 +18,8 @@ import SignOut from "@/app/(root)/(components)/sign-out";
 const routes = [
   { name: "Home", href: "/" },
   { name: "Communities", href: "/communities" },
-  { name: "Marketplace", href: "/marketplace" },
-  { name: "Following", href: "/following" },
+  /* { name: "Marketplace", href: "/marketplace" }, */ // Lost a group member, so this feature was scrapped
+  /* { name: "Following", href: "/following" }, */
 ];
 
 async function UserButton() {
