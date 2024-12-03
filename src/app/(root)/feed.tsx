@@ -10,8 +10,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-type PostWithImages = Tables<"Post"> & {
-  PostImage: Tables<"PostImage">[];
+type PostWithAttributes = Tables<"Post"> & {
+  PostImage?: Tables<"PostImage">[];
+  Comments?: Tables<"Comment">[];
 };
 
 const projectId =
@@ -21,7 +22,7 @@ function FeedPost({
   post,
   inline,
 }: {
-  post: PostWithImages;
+  post: PostWithAttributes;
   inline?: boolean;
 }) {
   const {
@@ -98,7 +99,7 @@ function FeedPost({
         </div>
       </div>
       <p className="leading-7">{post.body}</p>
-      {post.PostImage?.length > 0 && (
+      {post.PostImage && post.PostImage?.length > 0 && (
         <div className="flex w-full gap-8">
           {post.PostImage?.map((image) => (
             <img
@@ -118,12 +119,12 @@ export default function Feed({
   disableCreatePost,
   inline,
 }: {
-  initalPosts: PostWithImages[] | null;
+  initalPosts: PostWithAttributes[] | null;
   disableCreatePost?: boolean;
   inline?: boolean;
 }) {
   const supabase = createClient();
-  const [posts, setPosts] = useState<PostWithImages[]>(initalPosts || []);
+  const [posts, setPosts] = useState<PostWithAttributes[]>(initalPosts || []);
 
   useEffect(() => {
     const postChannel = supabase
@@ -142,7 +143,7 @@ export default function Feed({
 
           if (payload.eventType === "INSERT") {
             console.log("New post incoming!", payload.new);
-            setPosts((prev) => [payload.new as PostWithImages, ...prev]);
+            setPosts((prev) => [payload.new as PostWithAttributes, ...prev]);
           }
         },
       )
@@ -163,7 +164,7 @@ export default function Feed({
 
                 return {
                   ...post,
-                  PostImage: post.PostImage.filter(
+                  PostImage: post.PostImage?.filter(
                     (image) => image.id !== payload.old.id,
                   ),
                 };
@@ -191,9 +192,69 @@ export default function Feed({
       )
       .subscribe();
 
+      const postCommentChannel = supabase
+      .channel("public:comment")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "Comment" },
+        (payload) => {
+          console.log(payload);
+
+          if (payload.eventType === "DELETE") {
+            setPosts((prev) =>
+              prev.map((post) => {
+                if (post.id !== payload.old.post) return post;
+
+                return {
+                  ...post,
+                  Comments: post.Comments?.filter(
+                    (comment) => comment.id !== payload.old.id,
+                  ),
+                };
+              }),
+            );
+          }
+
+          if (payload.eventType === "INSERT") {
+            console.log("New image incoming!", payload.new);
+            setPosts((prev) =>
+              prev.map((post) => {
+                if (post.id !== payload.new.post) return post;
+
+                return {
+                  ...post,
+                  Comment: [
+                    ...(post.Comments || []),
+                    payload.new as Tables<"Comment">,
+                  ],
+                };
+              }),
+            );
+          }
+
+          if (payload.eventType === "UPDATE") {
+            setPosts((prev) =>
+              prev.map((post) => {
+                if (post.id !== payload.new.post) return post;
+
+                return {
+                  ...post,
+                  Comment: [
+                    ...(post.Comments || []),
+                    payload.new as Tables<"Comment">,
+                  ],
+                };
+              }),
+            );
+          }
+        },
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(postChannel);
       supabase.removeChannel(postImageChannel);
+      supabase.removeChannel(postCommentChannel);
     };
   }, [supabase]);
 
