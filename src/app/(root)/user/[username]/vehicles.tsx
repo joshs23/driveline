@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import CreateVehicle from "./create-vehicle";
-import { Plus, X } from "lucide-react";
+import { LoaderCircle, Plus, X } from "lucide-react";
 import {
   Dialog,
   DialogClose,
@@ -126,8 +126,8 @@ export default function Vehicles({ username }: { username: string }) {
 
   if (loading)
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-xl text-gray-800">Loading vehicles...</p>
+      <div className="flex min-h-screen w-full items-center justify-center">
+        <LoaderCircle size={32} strokeWidth={2.75} className="animate-spin" />
       </div>
     );
 
