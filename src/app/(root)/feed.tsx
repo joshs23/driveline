@@ -441,7 +441,7 @@ export default function Feed({
             console.log("New Comment incoming!", payload.new);
             setPosts((prev) =>
               prev.map((post) => {
-                if (post.id !== payload.new.post) return post;
+                if (post.id !== payload.new.Parent_post) return post;
 
                 return {
                   ...post,
