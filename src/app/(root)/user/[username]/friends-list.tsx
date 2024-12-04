@@ -27,7 +27,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { set, z } from "zod";
+import { Toaster, toast } from 'sonner'
 
 const projectId =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
@@ -125,75 +126,6 @@ async function getUserDetails(userIds: string[]) {
   return data;
 }
 
-async function addFriend(friend: z.infer<typeof formSchema>) {
-  const supabase = createClient();
-  const authUser = await getAuthenticatedUser();
-
-  if (!authUser) {
-    console.log("No authenticated user found");
-    return;
-  }
-
-  // Find the user ID for the target friend (username)
-  const { data, error } = await supabase
-    .from("UserProfile")
-    .select("user_id")
-    .eq("username", friend.username)
-    .single();
-
-  if (data?.user_id === authUser.id) {
-    console.log("You can't add yourself as a friend.");
-    return;
-  }
-
-  if (error || !data) {
-    console.log("Error finding user:", error);
-    return;
-  }
-
-  const myUserId = authUser.id;
-  const targetUserId = data.user_id;
-
-  // Check if there's already a pending or accepted friendship
-  const { data: existingFriendship, error: friendshipError } = await supabase
-    .from("Friends")
-    .select("*")
-    .eq("user_id1", myUserId)
-    .eq("user_id2", targetUserId)
-    .single();
-
-  console.log("existingFriendship", existingFriendship);
-
-  if (
-    friendshipError &&
-    friendshipError.details !== "The result contains 0 rows"
-  ) {
-    console.log("Error checking for existing friendship:", friendshipError);
-    return;
-  }
-
-  // If no existing friendship is found, insert a new request
-  if (existingFriendship) {
-    console.log("Friend request already exists or is accepted.");
-    return;
-  }
-
-  // Insert a new friendship request (pending status)
-  const { error: insertError } = await supabase.from("Friends").insert([
-    {
-      user_id1: myUserId,
-      user_id2: targetUserId,
-      accepted: false, // Pending request
-    },
-  ]);
-
-  if (insertError) {
-    console.log("Error sending friend request:", insertError);
-  } else {
-    console.log("Friend request sent to: " + targetUserId);
-  }
-}
-
 async function handleAcceptRequest(friendId: string) {
   const supabase = createClient();
   const authUser = await getAuthenticatedUser();
@@ -238,6 +170,80 @@ const formSchema = z.object({
 });
 
 export default function FriendsList({ username }: { username: string }) {
+  const [toastMessage, setToastMessage] = useState("");
+
+  async function addFriend(friend: z.infer<typeof formSchema>) {
+    const supabase = createClient();
+    const authUser = await getAuthenticatedUser();
+  
+    if (!authUser) {
+      console.log("No authenticated user found");
+      return;
+    }
+  
+    // Find the user ID for the target friend (username)
+    const { data, error } = await supabase
+      .from("UserProfile")
+      .select("user_id")
+      .eq("username", friend.username)
+      .single();
+  
+    if (data?.user_id === authUser.id) {
+      setToastMessage("You can't add yourself as a friend.");
+      toast("You can't add yourself as a friend."); // Display toast immediately
+      return;
+    }
+  
+    if (error || !data) {
+      setToastMessage("User not found.");
+      toast("User not found."); // Display toast immediately
+      return;
+    }
+  
+    const myUserId = authUser.id;
+    const targetUserId = data.user_id;
+  
+    // Check if there's already a pending or accepted friendship
+    const { data: existingFriendship, error: friendshipError } = await supabase
+      .from("Friends")
+      .select("*")
+      .eq("user_id1", myUserId)
+      .eq("user_id2", targetUserId)
+      .single();
+  
+    if (
+      friendshipError &&
+      friendshipError.details !== "The result contains 0 rows"
+    ) {
+      console.log("Error checking for existing friendship:", friendshipError);
+      return;
+    }
+  
+    if (existingFriendship) {
+      setToastMessage("Friend request already exists or is accepted.");
+      toast("Friend request already exists or is accepted."); // Display toast immediately
+      return;
+    }
+  
+    const { error: insertError } = await supabase.from("Friends").insert([
+      {
+        user_id1: myUserId,
+        user_id2: targetUserId,
+        accepted: false, // Pending request
+      },
+    ]);
+  
+    if (insertError) {
+      console.log("Error sending friend request:", insertError);
+      setToastMessage("Failed to send friend request.");
+      toast("Failed to send friend request."); // Display toast immediately
+    } else {
+      setToastMessage("Friend request sent to: " + friend.username);
+      toast("Friend request sent to: " + friend.username); // Display toast immediately
+    }
+  }
+  
+
   const [friends, setFriends] = useState<
     | {
         user_id: string;
@@ -263,7 +269,6 @@ export default function FriendsList({ username }: { username: string }) {
     profile_picture_url: string | null;
   } | null>(null);
 
-  const [authUser, setAuthUser] = useState();
   const [amOwner, setAmOwner] = useState(false);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -352,6 +357,8 @@ export default function FriendsList({ username }: { username: string }) {
   }
 
   return (
+    <div>
+    <Toaster />
     <Dialog
       open={showConfirmDelete}
       onOpenChange={(open) => {
@@ -543,5 +550,6 @@ export default function FriendsList({ username }: { username: string }) {
         </div>
       </DialogContent>
     </Dialog>
+    </div>
   );
 }
