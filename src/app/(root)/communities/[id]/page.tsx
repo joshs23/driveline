@@ -118,6 +118,9 @@ export default function Page({
     getData();
   }, [memberIds]);
 
+  const projectId =
+  process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
+
   const handleJoin = async () => {
     const supabase = await createClient();
     const user = await supabase.auth.getUser();
@@ -210,9 +213,9 @@ export default function Page({
                           <Avatar className="h-12 w-12 flex-shrink-0">
                             <AvatarImage
                               src={
-                                memberProfile.profile_picture_url as
-                                  | string
-                                  | undefined
+                                (memberProfile?.profile_picture_url &&
+                                  `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${memberProfile.profile_picture_url}`) ||
+                                undefined
                               }
                               alt={`${memberProfile.display_name}'s avatar`}
                               className="rounded-full"
