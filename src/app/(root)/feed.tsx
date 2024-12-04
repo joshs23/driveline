@@ -96,7 +96,7 @@ function CommentSection({ post }: { post: PostWithAttributes }) {
     queryFn: async () => {
       const { data: authUser } = await supabase.auth.getUser();
 
-      if (!authUser || !authUser.user) return;
+      if (!authUser || !authUser.user) return null;
 
       const { data, error } = await supabase
         .from("UserProfile")

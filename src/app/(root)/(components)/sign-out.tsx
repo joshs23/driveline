@@ -3,9 +3,8 @@ import { createClient } from "@/utils/supabase/client";
 import { redirect } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 
-const queryClient = useQueryClient();
-
 export default function SignOut({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient();
   const supabase = createClient();
 
   return (
