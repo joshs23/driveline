@@ -91,6 +91,48 @@ export type Database = {
           },
         ];
       };
+      Comment: {
+        Row: {
+          id: number;
+          created_at: string;
+          edited: boolean;
+          body: string;
+          Parent_post: number;
+          Author: string;
+        };
+        Insert: {
+          id?: number;
+          created_at?: string;
+          edited?: boolean;
+          body: string;
+          Parent_post: number;
+          Author: string;
+        };
+        Update: {
+          id?: number;
+          created_at?: string;
+          edited?: boolean;
+          body?: string;
+          Parent_post?: number;
+          Author?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "Comment_Author_fkey";
+            columns: ["Author"];
+            isOneToOne: true;
+            referencedRelation: "UserProfile";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "Comment_Parent_post_fkey";
+            columns: ["Parent_post"];
+            isOneToOne: true;
+            referencedRelation: "Post";
+            referencedColumns: ["user_id"];
+          },
+        ];
+      };
       UserProfile: {
         Row: {
           banner_url: string | null;

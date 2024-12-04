@@ -33,12 +33,17 @@ export default async function Page({
 
   const { data, error } = await supabase
     .from("Post")
-    .select("*, PostImage(*)")
-    .eq("creator", user.user_id)
+    .select("*, PostImage(*), Comment(*)")
     .order("id", { ascending: false });
+
   if (error) {
     console.error(error);
   }
+
+  const formattedData = data?.map(post => ({
+    ...post,
+    Comment: Array.isArray(post.Comment) ? post.Comment : []
+  })) || null;
 
   return (
     <main className="flex h-screen w-full flex-col bg-secondary">
@@ -47,7 +52,7 @@ export default async function Page({
       <div className="grid w-full grow grid-cols-2 py-4">
         <div className="flex w-full flex-col gap-4 border-r">
           <h1 className="px-6 pt-4 text-3xl font-bold">Feed</h1>
-          <Feed initalPosts={data} disableCreatePost inline />
+          <Feed initalPosts={formattedData} disableCreatePost inline />
         </div>
 
         <Vehicles username={username} />

@@ -10,8 +10,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-type PostWithImages = Tables<"Post"> & {
-  PostImage: Tables<"PostImage">[];
+type PostWithAttributes = Tables<"Post"> & {
+  PostImage?: Tables<"PostImage">[];
+  Comment?: Tables<"Comment">[];
 };
 
 const projectId =
@@ -21,13 +22,13 @@ function FeedPost({
   post,
   inline,
 }: {
-  post: PostWithImages;
+  post: PostWithAttributes;
   inline?: boolean;
 }) {
   const {
-    isError,
+    isError: isAuthorError,
     data: authorData,
-    error,
+    error: authorError,
   } = useQuery({
     queryKey: ["author_id", post.creator],
     queryFn: async () => {
@@ -43,17 +44,44 @@ function FeedPost({
       return data;
     },
   });
+  const { 
+    isError: isCommentError, 
+    data: commentAuthorData,
+    error: commentError, 
+  } = useQuery({
+    queryKey: ["comment_author", post.Comment],
+    queryFn: async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("UserProfile")
+        .select("*")
+        .in("user_id", post.Comment?.map(comment => comment.Author) || [])
 
-  if (isError)
+      if (error) console.error("Error retrieving comment details", error);
+
+      return data;
+    }
+  });
+
+  if (isAuthorError)
     return (
       <div
         key={post.id}
         className="flex w-full flex-col gap-2 border-b bg-card p-4 shadow-lg"
       >
-        <p>Error: {error.message}</p>
+        <p>Error: {authorError.message}</p>
       </div>
     );
 
+  if (isCommentError)
+    return (
+      <div
+        key={post.id}
+        className="flex w-full flex-col gap-2 border-b bg-card p-4 shadow-lg"
+      >
+        <p>Error: {commentError.message}</p>
+      </div>
+    );
   return (
     <div
       key={post.id}
@@ -98,7 +126,7 @@ function FeedPost({
         </div>
       </div>
       <p className="leading-7">{post.body}</p>
-      {post.PostImage?.length > 0 && (
+      {post.PostImage && post.PostImage?.length > 0 && (
         <div className="flex w-full gap-8">
           {post.PostImage?.map((image) => (
             <img
@@ -109,6 +137,43 @@ function FeedPost({
           ))}
         </div>
       )}
+      {post.Comment && post.Comment?.length > 0 && (
+        <>
+          {post.Comment.map((comment) => {
+            const commentAuthor = commentAuthorData?.find(
+              (author) => author.user_id === comment.Author
+            );
+            return (
+            <div key={comment.id} className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <div className="text-sm text-neutral-400">
+                <Link href={`/user/${commentAuthor?.username}`} passHref>
+                    <Avatar>
+                      <AvatarImage
+                        src={commentAuthor?.profile_picture_url as string | undefined}
+                        alt="Avatar"
+                      />
+                      <AvatarFallback>
+                        {commentAuthor?.display_name.toString().charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    </Link>
+                </div>
+                <div className="bg-neutral-700 p-2 rounded-lg">
+                  <div className="flex gap-2">
+                    <p>{comment.body}</p>
+                    <Link href={`/user/${commentAuthor?.username}`} passHref>
+                      <p className="text-sm text-neutral-400">
+                      @{commentAuthor?.username}
+                      </p>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )})}
+        </>
+      )}
     </div>
   );
 }
@@ -118,12 +183,12 @@ export default function Feed({
   disableCreatePost,
   inline,
 }: {
-  initalPosts: PostWithImages[] | null;
+  initalPosts: PostWithAttributes[] | null;
   disableCreatePost?: boolean;
   inline?: boolean;
 }) {
   const supabase = createClient();
-  const [posts, setPosts] = useState<PostWithImages[]>(initalPosts || []);
+  const [posts, setPosts] = useState<PostWithAttributes[]>(initalPosts || []);
 
   useEffect(() => {
     const postChannel = supabase
@@ -142,7 +207,7 @@ export default function Feed({
 
           if (payload.eventType === "INSERT") {
             console.log("New post incoming!", payload.new);
-            setPosts((prev) => [payload.new as PostWithImages, ...prev]);
+            setPosts((prev) => [payload.new as PostWithAttributes, ...prev]);
           }
         },
       )
@@ -163,7 +228,7 @@ export default function Feed({
 
                 return {
                   ...post,
-                  PostImage: post.PostImage.filter(
+                  PostImage: post.PostImage?.filter(
                     (image) => image.id !== payload.old.id,
                   ),
                 };
@@ -191,9 +256,69 @@ export default function Feed({
       )
       .subscribe();
 
+      const postCommentChannel = supabase
+      .channel("public:comment")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "Comment" },
+        (payload) => {
+          console.log(payload);
+
+          if (payload.eventType === "DELETE") {
+            setPosts((prev) =>
+              prev.map((post) => {
+                if (post.id !== payload.old.post) return post;
+
+                return {
+                  ...post,
+                  Comments: post.Comment?.filter(
+                    (comment) => comment.id !== payload.old.id,
+                  ),
+                };
+              }),
+            );
+          }
+
+          if (payload.eventType === "INSERT") {
+            console.log("New image incoming!", payload.new);
+            setPosts((prev) =>
+              prev.map((post) => {
+                if (post.id !== payload.new.post) return post;
+
+                return {
+                  ...post,
+                  Comment: [
+                    ...(post.Comment || []),
+                    payload.new as Tables<"Comment">,
+                  ],
+                };
+              }),
+            );
+          }
+
+          if (payload.eventType === "UPDATE") {
+            setPosts((prev) =>
+              prev.map((post) => {
+                if (post.id !== payload.new.post) return post;
+
+                return {
+                  ...post,
+                  Comment: [
+                    ...(post.Comment || []),
+                    payload.new as Tables<"Comment">,
+                  ],
+                };
+              }),
+            );
+          }
+        },
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(postChannel);
       supabase.removeChannel(postImageChannel);
+      supabase.removeChannel(postCommentChannel);
     };
   }, [supabase]);
 
