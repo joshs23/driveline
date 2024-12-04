@@ -59,8 +59,6 @@ async function getVehicles({ username }: { username: string }) {
 
 // Function to delete a vehicle
 async function deleteVehicle(vehicleId: string) {
-  const queryClient = useQueryClient();
-
   const supabase = createClient();
   const { data, error } = await supabase
     .from("Vehicle")
@@ -72,11 +70,11 @@ async function deleteVehicle(vehicleId: string) {
     return false;
   }
 
-  queryClient.invalidateQueries({ queryKey: ["client_vehicles"] });
   return true;
 }
 
 export default function Vehicles({ username }: { username: string }) {
+  const queryClient = useQueryClient();
   const [vehicles, setVehicles] = useState<
     | {
         id: string;
@@ -120,6 +118,7 @@ export default function Vehicles({ username }: { username: string }) {
       }
       setShowConfirmDelete(false);
       setVehicleToDelete(null);
+      queryClient.invalidateQueries({ queryKey: ["client_vehicles"] });
     }
   };
 
