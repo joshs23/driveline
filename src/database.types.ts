@@ -93,7 +93,7 @@ export type Database = {
       };
       Comment: {
         Row: {
-          id: number;
+          id: string;
           created_at: string;
           edited: boolean;
           body: string;
@@ -101,7 +101,7 @@ export type Database = {
           Author: number;
         };
         Insert: {
-          id?: number;
+          id?: string;
           created_at?: string;
           edited?: boolean;
           body: string;
@@ -109,7 +109,7 @@ export type Database = {
           Author: number;
         };
         Update: {
-          id?: number;
+          id?: string;
           created_at?: string;
           edited?: boolean;
           body?: string;
@@ -129,7 +129,7 @@ export type Database = {
             columns: ["Parent_post"];
             isOneToOne: true;
             referencedRelation: "Post";
-            referencedColumns: ["id"];
+            referencedColumns: ["user_id"];
           },
         ];
       };
