@@ -11,6 +11,20 @@ import { toast } from "sonner";
 const projectId =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
 
+function sanitizeFileName(fileName: string): string {
+  const sanitized = fileName
+    .replace(/[^a-zA-Z0-9!\-_.*'()]/g, "_") // Only allow permitted characters
+    .replace(/\/+/g, "/") // Prevent multiple slashes from collapsing
+    .replace(/^\//, "") // Remove leading slash
+    .replace(/\/$/, ""); // Remove trailing slash
+
+  if (sanitized.length === 0 || Buffer.byteLength(sanitized, "utf-8") > 1024) {
+    throw new Error("File name is invalid or exceeds object key limits");
+  }
+
+  return sanitized;
+}
+
 async function getCurrentUser() {
   const supabase = createClient();
   const { data, error } = await supabase.auth.getUser();
@@ -43,9 +57,13 @@ function Banner({ userDetails }: { userDetails: Tables<"UserProfile"> }) {
     const supabase = createClient();
     const { data: imageData, error } = await supabase.storage
       .from("avatars")
-      .upload(`${userDetails.id}/banner/${bannerImage.name}`, bannerImage, {
-        upsert: true,
-      });
+      .upload(
+        `${userDetails.id}/banner/${sanitizeFileName(bannerImage.name)}`,
+        bannerImage,
+        {
+          upsert: true,
+        },
+      );
 
     if (error) {
       console.error("Error uploading image:", error, imageData);
