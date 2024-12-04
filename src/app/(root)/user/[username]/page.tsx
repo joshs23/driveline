@@ -49,11 +49,17 @@ export default async function Page({
     })) || null;
 
   return (
-    <main className="flex h-screen w-full flex-col bg-secondary">
-      <UserPage username={username} />
-      <div className="grid w-full grow grid-cols-3 py-4">
-        <div className="flex w-full flex-col gap-4 border-r">
-          <h1 className="px-6 pt-4 text-3xl font-bold">Feed</h1>
+    <>
+    <main className="flex w-full flex-col bg-secondary">
+      <div className="relative">
+        <UserPage username={username} />
+      </div>
+      <div className="grid w-full grow grid-cols-10 py-4">
+        <div className="flex w-full flex-col gap-4 border-r col-span-2 h-screen overflow-y-auto">
+          <Vehicles username={username} />
+        </div>
+        <div className="flex w-full flex-col gap-4 border-r col-span-6 overflow-y-auto">
+          <h1 className="px-6 pt-4 text-3xl font-bold text-center">Feed</h1>
           <Feed
             initalPosts={formattedData}
             feedUserId={user.user_id}
@@ -61,13 +67,11 @@ export default async function Page({
             inline
           />
         </div>
-        <div className="flex w-full flex-col gap-4 border-r">
-          <Vehicles username={username} />
-        </div>
-        <div className="flex w-full flex-col gap-4 border-r">
+        <div className="flex w-full flex-col gap-4 border-r col-span-2 h-screen overflow-y-auto">
           <FriendsList username={username} />
         </div>
       </div>
     </main>
+    </>
   );
 }
