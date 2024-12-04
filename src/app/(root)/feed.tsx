@@ -182,10 +182,12 @@ export default function Feed({
   initalPosts,
   disableCreatePost,
   inline,
+  feedUserId,
 }: {
   initalPosts: PostWithAttributes[] | null;
   disableCreatePost?: boolean;
   inline?: boolean;
+  feedUserId?: string;
 }) {
   const supabase = createClient();
   const [posts, setPosts] = useState<PostWithAttributes[]>(initalPosts || []);
@@ -207,7 +209,14 @@ export default function Feed({
 
           if (payload.eventType === "INSERT") {
             console.log("New post incoming!", payload.new);
+
+            if (
+              !feedUserId ||
+              (feedUserId && feedUserId === payload.new.creator)
+            ) {
             setPosts((prev) => [payload.new as PostWithAttributes, ...prev]);
+            } else
+              console.log("New post was uploaded, but not by the feed user");
           }
         },
       )
