@@ -16,8 +16,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 
-const queryClient = useQueryClient();
-
 async function getViewedUser({ username }: { username: string }) {
   const supabase = createClient();
 
@@ -61,6 +59,8 @@ async function getVehicles({ username }: { username: string }) {
 
 // Function to delete a vehicle
 async function deleteVehicle(vehicleId: string) {
+  const queryClient = useQueryClient();
+
   const supabase = createClient();
   const { data, error } = await supabase
     .from("Vehicle")

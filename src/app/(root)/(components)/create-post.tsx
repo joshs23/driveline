@@ -25,6 +25,7 @@ import { FileUpload } from "@/components/ui/file-upload";
 import { IconLoader2 } from "@tabler/icons-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 
 async function insertPost(content: string) {
   const supabase = createClient();
@@ -58,6 +59,52 @@ const formSchema = z.object({
     }),
   images: z.array(z.instanceof(File)).optional(),
 });
+
+function VehicleTagging() {
+  const supabase = createClient();
+
+  const { data: vehicles } = useQuery({
+    queryKey: ["client_vehicles"],
+    queryFn: async () => {
+      const { data: authUser } = await supabase.auth.getUser();
+
+      if (!authUser || !authUser.user) return;
+
+      const { data, error } = await supabase
+        .from("Vehicle")
+        .select("*")
+        .eq("user_id", authUser.user.id);
+
+      if (error) console.error("Error retrieving user details", error);
+
+      return data;
+    },
+  });
+
+  if (!vehicles) return null;
+
+  return (
+    <ul className="flex flex-wrap gap-2">
+      {vehicles?.map((vehicle) => (
+        <li
+          key={vehicle.id}
+          className="relative flex w-fit items-center rounded-lg border bg-card p-4 shadow-lg"
+        >
+          <div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <p className="mr-4 text-lg font-semibold">
+                  {vehicle.year} {vehicle.make} {vehicle.model}
+                </p>
+              </div>
+            </div>
+            {vehicle.color && <p className="text-sm">Color: {vehicle.color}</p>}
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 export default function CreatePost({ inFlow }: { inFlow?: boolean }) {
   const [dialogOpen, setDialogOpen] = useState(false);

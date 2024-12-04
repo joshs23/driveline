@@ -24,6 +24,7 @@ import { useForm } from "react-hook-form";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { LoaderCircle } from "lucide-react";
+import Image from "next/image";
 
 const formSchema = z.object({
   email: z.string(),
@@ -66,6 +67,15 @@ export default function Login() {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Card className="mx-auto max-w-sm">
             <CardHeader>
+              <div className="mx-auto w-56 p-2">
+                <Image
+                  src="/driveline.png"
+                  width={806}
+                  height={624}
+                  alt="Driveline Logo"
+                  className=""
+                />
+              </div>
               <CardTitle className="text-2xl">Login</CardTitle>
               <CardDescription>
                 Enter your email below to login to your account
