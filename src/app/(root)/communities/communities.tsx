@@ -35,7 +35,7 @@ export default async function Communities() {
         <CreateCommunity />
       </div>
       <p className="mb-4 opacity-70">Find your people!</p>
-      <div className="flex gap-4">
+      <div className="gap-4 grid grid-cols-4">
         {listings.map((listing) => (
           <Link href={`/communities/${listing.id}`} passHref key={listing.name}>
             <div className="min-h-48 min-w-48 max-w-96 rounded-lg border-2 p-4 shadow-md transition-shadow duration-300 hover:bg-secondary">
