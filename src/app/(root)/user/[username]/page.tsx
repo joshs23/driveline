@@ -3,6 +3,7 @@ import UserPage from "./user-page";
 import Vehicles from "./vehicles";
 import Feed from "../../feed";
 import { notFound } from "next/navigation";
+import FriendsList from "./friends-list";
 
 export default async function Page({
   params,
@@ -34,28 +35,38 @@ export default async function Page({
   const { data, error } = await supabase
     .from("Post")
     .select("*, PostImage(*), Comment(*)")
+    .eq("creator", user.user_id)
     .order("id", { ascending: false });
 
   if (error) {
     console.error(error);
   }
 
-  const formattedData = data?.map(post => ({
-    ...post,
-    Comment: Array.isArray(post.Comment) ? post.Comment : []
-  })) || null;
+  const formattedData =
+    data?.map((post) => ({
+      ...post,
+      Comment: Array.isArray(post.Comment) ? post.Comment : [],
+    })) || null;
 
   return (
     <main className="flex h-screen w-full flex-col bg-secondary">
       <UserPage username={username} />
-
-      <div className="grid w-full grow grid-cols-2 py-4">
+      <div className="grid w-full grow grid-cols-3 py-4">
         <div className="flex w-full flex-col gap-4 border-r">
           <h1 className="px-6 pt-4 text-3xl font-bold">Feed</h1>
-          <Feed initalPosts={formattedData} disableCreatePost inline />
+          <Feed
+            initalPosts={formattedData}
+            feedUserId={user.user_id}
+            disableCreatePost
+            inline
+          />
         </div>
-
-        <Vehicles username={username} />
+        <div className="flex w-full flex-col gap-4 border-r">
+          <Vehicles username={username} />
+        </div>
+        <div className="flex w-full flex-col gap-4 border-r">
+          <FriendsList username={username} />
+        </div>
       </div>
     </main>
   );

@@ -141,27 +141,27 @@ export default function Vehicles({ username }: { username: string }) {
         }
       }}
     >
-      <div className="p-6">
-        <div className="mb-6 flex items-center gap-x-4">
+      <div className="px-4 py-4">
+        <div className="mb-4 flex items-center gap-x-4">
           <h1 className="text-3xl font-bold">Vehicles</h1>
           {myVehicles && <CreateVehicle />}
         </div>
-        <ul className="flex flex-wrap gap-4">
+        <ul className="flex flex-wrap gap-2">
           {vehicles?.map((vehicle) => (
             <li
               key={vehicle.id}
-              className="relative flex w-fit items-center rounded-lg border border-gray-300 bg-secondary-foreground p-4 shadow-md"
+              className="relative flex w-fit items-center rounded-lg border p-4 shadow-lg bg-card "
             >
               <div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <p className="mr-4 text-lg font-semibold text-gray-800">
+                    <p className="mr-4 text-lg font-semibold">
                       {vehicle.year} {vehicle.make} {vehicle.model}
                     </p>
                   </div>
                 </div>
                 {vehicle.color && (
-                  <p className="text-sm text-secondary">
+                  <p className="text-sm">
                     Color: {vehicle.color}
                   </p>
                 )}
@@ -175,7 +175,7 @@ export default function Vehicles({ username }: { username: string }) {
                       setShowConfirmDelete(true);
                       setVehicleToDelete(vehicle.id);
                     }}
-                    className="my-auto size-8 cursor-pointer rounded-full bg-primary p-1 text-primary-foreground shadow-md"
+                    className="my-auto size-6 cursor-pointer rounded-full bg-primary p-1 shadow-md transition-colors hover:bg-primary/60"
                   />
                 </DialogTrigger>
               )}
@@ -197,14 +197,14 @@ export default function Vehicles({ username }: { username: string }) {
             <DialogClose asChild>
               <Button
                 onClick={cancelDelete}
-                className="rounded-md bg-zinc-200 px-4 py-2 text-gray-700 hover:bg-gray-400"
+                className="rounded-md px-4 py-2 transition-colors hover:bg-primary/60"
               >
                 Cancel
               </Button>
             </DialogClose>
             <Button
               onClick={handleDelete}
-              className="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+              className="rounded-md px-4 py-2 transition-colors hover:bg-primary/60"
             >
               Confirm
             </Button>

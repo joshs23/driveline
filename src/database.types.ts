@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      Comment: {
+        Row: {
+          Author: string;
+          body: string;
+          created_at: string;
+          edited: boolean;
+          id: number;
+          Parent_post: number;
+        };
+        Insert: {
+          Author: string;
+          body: string;
+          created_at?: string;
+          edited?: boolean;
+          id?: number;
+          Parent_post: number;
+        };
+        Update: {
+          Author?: string;
+          body?: string;
+          created_at?: string;
+          edited?: boolean;
+          id?: number;
+          Parent_post?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "Comment_Author_fkey";
+            columns: ["Author"];
+            isOneToOne: false;
+            referencedRelation: "UserProfile";
+            referencedColumns: ["user_id"];
+          },
+          {
+            foreignKeyName: "Comment_Parent_post_fkey";
+            columns: ["Parent_post"];
+            isOneToOne: false;
+            referencedRelation: "Post";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       Community: {
         Row: {
           created_at: string;
@@ -27,6 +69,59 @@ export type Database = {
           description?: string | null;
           id?: number;
           name?: string;
+        };
+        Relationships: [];
+      };
+      CommunityMember: {
+        Row: {
+          community_id: number;
+          created_at: string;
+          creator_id: string;
+          id: number;
+          user_id: string;
+        };
+        Insert: {
+          community_id: number;
+          created_at?: string;
+          creator_id: string;
+          id?: number;
+          user_id: string;
+        };
+        Update: {
+          community_id?: number;
+          created_at?: string;
+          creator_id?: string;
+          id?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "CommunityMember_community_id_fkey";
+            columns: ["community_id"];
+            isOneToOne: false;
+            referencedRelation: "Community";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      Friends: {
+        Row: {
+          accepted: boolean;
+          id: number;
+          user_id1: string | null;
+          user_id2: string | null;
+        };
+        Insert: {
+          accepted: boolean;
+          id?: number;
+          user_id1?: string | null;
+          user_id2?: string | null;
+        };
+        Update: {
+          accepted?: boolean;
+          id?: number;
+          user_id1?: string | null;
+          user_id2?: string | null;
         };
         Relationships: [];
       };
@@ -91,48 +186,6 @@ export type Database = {
           },
         ];
       };
-      Comment: {
-        Row: {
-          id: number;
-          created_at: string;
-          edited: boolean;
-          body: string;
-          Parent_post: number;
-          Author: string;
-        };
-        Insert: {
-          id?: number;
-          created_at?: string;
-          edited?: boolean;
-          body: string;
-          Parent_post: number;
-          Author: string;
-        };
-        Update: {
-          id?: number;
-          created_at?: string;
-          edited?: boolean;
-          body?: string;
-          Parent_post?: number;
-          Author?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "Comment_Author_fkey";
-            columns: ["Author"];
-            isOneToOne: true;
-            referencedRelation: "UserProfile";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "Comment_Parent_post_fkey";
-            columns: ["Parent_post"];
-            isOneToOne: true;
-            referencedRelation: "Post";
-            referencedColumns: ["user_id"];
-          },
-        ];
-      };
       UserProfile: {
         Row: {
           banner_url: string | null;
@@ -192,6 +245,35 @@ export type Database = {
           year?: number;
         };
         Relationships: [];
+      };
+      VehicleImage: {
+        Row: {
+          created_at: string;
+          id: number;
+          image_url: string;
+          vehicle_id: number | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: number;
+          image_url: string;
+          vehicle_id?: number | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: number;
+          image_url?: string;
+          vehicle_id?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "VehicleImage_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "Vehicle";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
     Views: {

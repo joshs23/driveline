@@ -169,7 +169,11 @@ export default function CreatePost({ inFlow }: { inFlow?: boolean }) {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea placeholder="What's on your mind?" {...field} />
+                    <Textarea
+                      className="h-48 text-xl placeholder:text-xl"
+                      placeholder="What's on your mind?"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
