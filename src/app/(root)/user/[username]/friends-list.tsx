@@ -225,7 +225,9 @@ export default function FriendsList({ username }: { username: string }) {
       return;
     }
 
-    const { error: insertError } = await supabase.from("Friends").insert([
+    const { error: insertError } = await supabase
+    .from("Friends")
+    .insert([
       {
         user_id1: myUserId,
         user_id2: targetUserId,
