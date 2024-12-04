@@ -32,7 +32,6 @@ export default function Page({ params }: { params: { id: string } }) {
           ...post,
           Comment: Array.isArray(post.Comment) ? post.Comment : [],
         })) || [];
-      console.log(formattedData);
       setPosts(formattedData);
 
       const { data: communityData } = await supabase
@@ -139,7 +138,7 @@ export default function Page({ params }: { params: { id: string } }) {
           {/* Feed */}
           <div className="mt-4 flex items-center justify-between border-4 p-4">
             <h1 className="px-6 pt-4 text-3xl font-bold">Feed</h1>
-            <Feed initalPosts={posts} />
+            {posts.length > 0 ? <Feed initalPosts={posts} /> : <p>Loading posts...</p>}
           </div>
           {/* Members Section */}
           <div className="mt-4 flex items-center justify-between border-4 p-4">
