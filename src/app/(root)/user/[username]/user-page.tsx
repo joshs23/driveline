@@ -328,6 +328,9 @@ export default function UserPage({ username }: { username: string }) {
         message: "Add Friend",
       });
     }
+    if (currentUserId == userDetails?.user_id) {
+      setShowFriendButton({ show: false, color: "", message: "" });
+    }
   }, [friendRequestStatus]);
 
   if (isPending)

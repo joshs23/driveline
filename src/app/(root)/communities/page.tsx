@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { Tables } from "@/database.types";
+import Communities from "./communities"
 
 export default async function Page() {
   const supabase = await createClient();
@@ -10,12 +11,7 @@ export default async function Page() {
 
   return (
     <div className="container mx-auto py-8">
-      {communities.map((community: Tables<"Community">) => (
-        <div key={community.id}>
-          <h1>{community.name}</h1>
-          <p>{community.description}</p>
-        </div>
-      ))}
+      <Communities />
     </div>
-  );
+  )
 }
