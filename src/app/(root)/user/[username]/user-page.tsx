@@ -305,14 +305,14 @@ export default function UserPage({ username }: { username: string }) {
     } else if (friendRequestStatus === "pending") {
       setShowFriendButton({
         show: true,
-        color: "bg-yellow-500",
+        color: "bg-yellow-500 hover:bg-yellow-600",
         message: "Pending",
       });
     } else if (friendRequestStatus === "none") {
       setShowFriendButton({
         show: true,
-        color: "bg-red-500",
-        message: "Add friend",
+        color: "bg-red-500 hover:bg-red-600",
+        message: "Add Friend",
       });
     }
   }, [friendRequestStatus]);
@@ -363,7 +363,7 @@ export default function UserPage({ username }: { username: string }) {
           <div className="pt-2">
             <Button
               variant="fr"
-              className={`hover:none text-lg ${showFriendButton.color}`}
+              className={`text-lg font-semibold ${showFriendButton.color}`}
               onClick={
                 friendRequestStatus == "none"
                   ? requestFriend(userDetails)
