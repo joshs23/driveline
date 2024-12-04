@@ -27,8 +27,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { set, z } from "zod";
-import { Toaster, toast } from "sonner";
+import { z } from "zod";
+import { toast } from "sonner";
 
 const projectId =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
@@ -170,8 +170,6 @@ const formSchema = z.object({
 });
 
 export default function FriendsList({ username }: { username: string }) {
-  const [toastMessage, setToastMessage] = useState("");
-
   async function addFriend(friend: z.infer<typeof formSchema>) {
     const supabase = createClient();
     const authUser = await getAuthenticatedUser();
@@ -189,13 +187,11 @@ export default function FriendsList({ username }: { username: string }) {
       .single();
 
     if (data?.user_id === authUser.id) {
-      setToastMessage("You can't add yourself as a friend.");
       toast("You can't add yourself as a friend."); // Display toast immediately
       return;
     }
 
     if (error || !data) {
-      setToastMessage("User not found.");
       toast("User not found."); // Display toast immediately
       return;
     }
@@ -220,7 +216,6 @@ export default function FriendsList({ username }: { username: string }) {
     }
 
     if (existingFriendship) {
-      setToastMessage("Friend request already exists or is accepted.");
       toast("Friend request already exists or is accepted."); // Display toast immediately
       return;
     }
@@ -237,10 +232,8 @@ export default function FriendsList({ username }: { username: string }) {
 
     if (insertError) {
       console.log("Error sending friend request:", insertError);
-      setToastMessage("Failed to send friend request.");
       toast("Failed to send friend request."); // Display toast immediately
     } else {
-      setToastMessage("Friend request sent to: " + friend.username);
       toast("Friend request sent to: " + friend.username); // Display toast immediately
     }
   }
@@ -359,7 +352,6 @@ export default function FriendsList({ username }: { username: string }) {
 
   return (
     <div>
-      <Toaster />
       <Dialog
         open={showConfirmDelete}
         onOpenChange={(open) => {
@@ -435,17 +427,16 @@ export default function FriendsList({ username }: { username: string }) {
                           href={`/user/${friendRequest.username}`}
                           className="flex items-center"
                         >
-                          <Avatar className="h-12 w-12 flex-shrink-0">
+                          <Avatar>
                             <AvatarImage
                               src={
-                                friendRequest.profile_picture_url as
-                                  | string
-                                  | undefined
+                                (friendRequest?.profile_picture_url &&
+                                  `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${friendRequest.profile_picture_url}`) ||
+                                undefined
                               }
-                              alt={`${friendRequest.display_name}'s avatar`}
-                              className="rounded-full"
+                              alt="Avatar"
                             />
-                            <AvatarFallback className="flex h-full w-full items-center justify-center rounded-full font-bold">
+                            <AvatarFallback>
                               {friendRequest.display_name.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
@@ -490,20 +481,20 @@ export default function FriendsList({ username }: { username: string }) {
                   <div className="flex items-center space-x-4">
                     <div className="relative flex w-fit items-center rounded-lg border bg-card p-4 shadow-lg transition-colors hover:bg-card/20">
                       <Link href={`/user/${friend.username}`} className="flex">
-                      <Avatar className="h-12 w-12 flex-shrink-0">
-                            <AvatarImage
-                              src={
-                                friend.profile_picture_url as
-                                  | string
-                                  | undefined
-                              }
-                              alt={`${friend.display_name}'s avatar`}
-                              className="rounded-full"
-                            />
-                            <AvatarFallback className="flex h-full w-full items-center justify-center rounded-full font-bold">
-                              {friend.display_name.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
+                        <Avatar>
+                          <AvatarImage
+                            src={
+                              (friend?.profile_picture_url &&
+                                `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${friend.profile_picture_url}`) ||
+                              undefined
+                            }
+                            alt="Avatar"
+                          />
+
+                          <AvatarFallback>
+                            {friend.display_name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
                         <div className="px-2">
                           <p className="font-semibold">{friend.display_name}</p>
                           <p className="text-sm">@{friend.username}</p>
@@ -533,7 +524,7 @@ export default function FriendsList({ username }: { username: string }) {
         <DialogContent className="w-full max-w-sm rounded-lg p-6 shadow-lg">
           <DialogHeader>
             <DialogTitle className="mb-4 text-xl font-semibold">
-              Confirm Deletion
+              Confirm Friend Removal
             </DialogTitle>
             <DialogDescription className="mb-4 text-sm">
               Are you sure?

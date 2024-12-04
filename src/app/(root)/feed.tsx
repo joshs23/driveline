@@ -21,6 +21,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogPortal,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type PostWithAttributes = Tables<"Post"> & {
   PostImage?: Tables<"PostImage">[];
@@ -259,6 +265,9 @@ function FeedPost({
   post: PostWithAttributes;
   inline?: boolean;
 }) {
+  const [imageUrl, setImageUrl] = useState<string>();
+  const [showImageDialog, setShowImageDialog] = useState(false);
+
   const {
     data: authorData,
     isError: isAuthorError,
@@ -279,6 +288,11 @@ function FeedPost({
     },
   });
 
+  function handleImageClick(url: string) {
+    setImageUrl(url);
+    setShowImageDialog(true);
+  }
+
   if (isAuthorError)
     return (
       <div
@@ -290,66 +304,86 @@ function FeedPost({
     );
 
   return (
-    <div
-      key={post.id}
-      className={cn(
-        !inline && "bg-card",
-        "flex w-full flex-col gap-2 border-b px-8 py-4 shadow-lg",
-      )}
-    >
-      <div className="flex items-center gap-2">
-        {authorData ? (
-          <Link href={`/user/${authorData.username}`} passHref>
-            <Avatar className="border border-secondary">
-              <AvatarImage
-                src={
-                  (authorData?.profile_picture_url &&
-                    `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${authorData.profile_picture_url}`) ||
-                  undefined
-                }
-                alt="Avatar"
-              />
-              <AvatarFallback>
-                {authorData?.display_name.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-          </Link>
-        ) : (
-          <Skeleton className="h-10 w-10 rounded-full" />
+    <>
+      <div
+        key={post.id}
+        className={cn(
+          !inline && "bg-card",
+          "flex w-full flex-col gap-2 border-b px-8 py-4 shadow-lg",
         )}
-        <div className="flex gap-2">
+      >
+        <div className="flex items-center gap-2">
           {authorData ? (
             <Link href={`/user/${authorData.username}`} passHref>
-              <p className="font-bold">{authorData?.display_name}</p>
+              <Avatar className="border border-secondary">
+                <AvatarImage
+                  src={
+                    (authorData?.profile_picture_url &&
+                      `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${authorData.profile_picture_url}`) ||
+                    undefined
+                  }
+                  alt="Avatar"
+                />
+                <AvatarFallback>
+                  {authorData?.display_name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
             </Link>
           ) : (
-            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-10 w-10 rounded-full" />
           )}
-          {authorData ? (
-            <Link href={`/user/${authorData.username}`} passHref>
-              <p className="text-sm text-neutral-400">
-                @{authorData?.username}
-              </p>
-            </Link>
-          ) : (
-            <Skeleton className="h-4 w-20" />
-          )}
+          <div className="flex gap-2">
+            {authorData ? (
+              <Link href={`/user/${authorData.username}`} passHref>
+                <p className="font-bold">{authorData?.display_name}</p>
+              </Link>
+            ) : (
+              <Skeleton className="h-4 w-40" />
+            )}
+            {authorData ? (
+              <Link href={`/user/${authorData.username}`} passHref>
+                <p className="text-sm text-neutral-400">
+                  @{authorData?.username}
+                </p>
+              </Link>
+            ) : (
+              <Skeleton className="h-4 w-20" />
+            )}
+          </div>
         </div>
+        <p className="leading-7">{post.body}</p>
+        {post.PostImage && post.PostImage?.length > 0 && (
+          <div className="flex w-full flex-wrap gap-8">
+            {post.PostImage?.map((image) => (
+              <img
+                key={image.id}
+                src={`https://${projectId}.supabase.co/storage/v1/object/public/feed/${image.image_url}`}
+                className="max-h-36 max-w-64 cursor-pointer object-cover"
+                onClick={() =>
+                  handleImageClick(
+                    `https://${projectId}.supabase.co/storage/v1/object/public/feed/${image.image_url}`,
+                  )
+                }
+              />
+            ))}
+          </div>
+        )}
+        <CommentSection post={post} />
       </div>
-      <p className="leading-7">{post.body}</p>
-      {post.PostImage && post.PostImage?.length > 0 && (
-        <div className="flex w-full flex-wrap gap-8">
-          {post.PostImage?.map((image) => (
+
+      <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
+        <DialogPortal>
+          <DialogContent className="m-auto size-auto p-0">
+            <DialogTitle className="hidden" />
             <img
-              key={image.id}
-              src={`https://${projectId}.supabase.co/storage/v1/object/public/feed/${image.image_url}`}
-              className="max-h-36 max-w-64 object-cover"
+              src={imageUrl}
+              alt="Image"
+              className="size-full rounded-md object-cover"
             />
-          ))}
-        </div>
-      )}
-      <CommentSection post={post} />
-    </div>
+          </DialogContent>
+        </DialogPortal>
+      </Dialog>
+    </>
   );
 }
 
