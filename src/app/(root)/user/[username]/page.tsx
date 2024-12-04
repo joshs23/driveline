@@ -50,28 +50,28 @@ export default async function Page({
 
   return (
     <>
-    <main className="flex w-full flex-col bg-secondary">
-      <div className="relative">
-        <UserPage username={username} />
-      </div>
-      <div className="grid w-full grow grid-cols-10 py-4">
-        <div className="flex w-full flex-col gap-4 border-r col-span-2 h-screen overflow-y-auto">
-          <Vehicles username={username} />
+      <main className="flex w-full flex-col bg-secondary">
+        <div className="relative">
+          <UserPage username={username} />
         </div>
-        <div className="flex w-full flex-col gap-4 border-r col-span-6 overflow-y-auto">
-          <h1 className="px-6 pt-4 text-3xl font-bold text-center">Feed</h1>
-          <Feed
-            initalPosts={formattedData}
-            feedUserId={user.user_id}
-            disableCreatePost
-            inline
-          />
+        <div className="grid h-0 w-full grow grid-cols-10 py-4">
+          <div className="col-span-2 flex h-full w-full flex-col gap-4 overflow-y-auto border-r">
+            <Vehicles username={username} />
+          </div>
+          <div className="col-span-6 flex w-full flex-col gap-4 overflow-y-auto border-r">
+            <h1 className="px-6 pt-4 text-center text-3xl font-bold">Feed</h1>
+            <Feed
+              initalPosts={formattedData}
+              feedUserId={user.user_id}
+              disableCreatePost
+              inline
+            />
+          </div>
+          <div className="col-span-2 flex h-full w-full flex-col gap-4 overflow-y-auto border-r">
+            <FriendsList username={username} />
+          </div>
         </div>
-        <div className="flex w-full flex-col gap-4 border-r col-span-2 h-screen overflow-y-auto">
-          <FriendsList username={username} />
-        </div>
-      </div>
-    </main>
+      </main>
     </>
   );
 }
