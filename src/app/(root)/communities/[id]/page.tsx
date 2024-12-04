@@ -8,20 +8,46 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Feed from "@/app/(root)/feed";
 
-export default function Page({ params }: { params: { id: string } }) {
+interface Community {
+  id: number;
+  name: string;
+  description: string | null;
+}
+
+interface Member {
+  username: string;
+  display_name: string;
+  profile_picture_url: string | null;
+}
+
+interface Post {
+  id: number;
+  body: string;
+  community: number | null;
+  created_at: string;
+  creator: string;
+  content: string;
+  author: string;
+  createdAt: string;
+}
+
+export default function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const [amMember, setAmMember] = useState(false);
-  const [community, setCommunity] = useState<any>(null);
-  const [members, setMembers] = useState<any[]>([]);
-  const [memberProfiles, setMemberProfiles] = useState<any[]>([]);
-  const [posts, setPosts] = useState<any[]>([]);
+  const [community, setCommunity] = useState<Community | null>(null);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [memberProfiles, setMemberProfiles] = useState<Member[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [memberIds, setMemberIds] = useState<string[]>([]);
+
 
   useEffect(() => {
     const fetchData = async () => {
       const { id } = await params;
       const supabase = await createClient();
-
-
 
       const { data: communityData } = await supabase
         .from("Community")
@@ -33,10 +59,15 @@ export default function Page({ params }: { params: { id: string } }) {
         return notFound();
       }
 
-      const { data: membersData } = await supabase
+      const { data: memberIds } = await supabase
         .from("CommunityMember")
         .select("user_id")
         .eq("community_id", id);
+
+      const { data: membersData } = await supabase
+        .from("UserProfile")
+        .select("*")
+        .in("user_id", memberIds?.map((member) => member.user_id) || []);
 
       const user = await supabase.auth.getUser();
       const userId = user.data.user?.id;
@@ -115,7 +146,7 @@ export default function Page({ params }: { params: { id: string } }) {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 ">
       <div className="rounded-lg p-6">
         <div className="flex items-center justify-between border-4 p-4">
           {/* Community Header */}
@@ -131,21 +162,21 @@ export default function Page({ params }: { params: { id: string } }) {
             {!amMember ? (
               <Button
                 onClick={handleJoin}
-                className="rounded-md bg-primary px-4 py-2 text-white"
+                className="rounded-md bg-primary px-4 text-white"
               >
                 Join Community
               </Button>
             ) : (
               <Button
                 onClick={handleLeave}
-                className="rounded-md bg-red-500 px-4 py-2 text-white"
+                className="rounded-md bg-primary px-4 text-white"
               >
                 Leave Community
               </Button>
             )}
           </div>
         </div>
-        <div className="columns-2">
+        <div className="flex gap-8">
           {/* Feed */}
           <div className="mt-4 flex items-center justify-between border-4 p-4">
             <h1 className="px-6 pt-4 text-3xl font-bold">Feed</h1>
@@ -153,12 +184,12 @@ export default function Page({ params }: { params: { id: string } }) {
                                       feedUserId={memberIds}/> : <p>Loading posts...</p>}
           </div>
           {/* Members Section */}
-          <div className="mt-4 flex items-center justify-between border-4 p-4">
+          <div className="mt-4 items-center justify-between border-4 p-4 w-1/4">
             <h2 className="mb-3 p-4 text-2xl font-semibold">Members</h2>
             {(members.length ?? 0) <= 0 ? (
               <p className="italic">There are no members in this community.</p>
             ) : (
-              <ul className="space-y-2 px-4">
+              <ul className="space-y-2">
                 {memberProfiles?.map(
                   (memberProfile: {
                     username: string;
@@ -167,7 +198,7 @@ export default function Page({ params }: { params: { id: string } }) {
                   }) => (
                     <li
                       key={memberProfile.username}
-                      className="flex w-fit items-center gap-4 rounded-md bg-card p-4 shadow-lg transition-shadow duration-300 hover:bg-primary"
+                      className="items-center rounded-md bg-card p-2 shadow-lg transition-shadow duration-300 hover:bg-primary"
                     >
                       <Link href={`/user/${memberProfile.username}`}>
                         <div className="flex">

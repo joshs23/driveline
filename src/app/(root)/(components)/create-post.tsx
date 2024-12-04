@@ -26,6 +26,7 @@ import { IconLoader2 } from "@tabler/icons-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import { sanitizeFileName } from "../user/[username]/user-page";
 
 async function insertPost(content: string) {
   const supabase = createClient();
@@ -148,7 +149,7 @@ export default function CreatePost({ inFlow }: { inFlow?: boolean }) {
       const imagePromises = values.images.map((image, i) => {
         const storagePromise = supabase.storage
           .from("feed")
-          .upload(`${post.id}/${i}_${image.name}`, image, {
+          .upload(`${post.id}/${i}_${sanitizeFileName(image.name)}`, image, {
             cacheControl: "3600",
             upsert: false,
           });
