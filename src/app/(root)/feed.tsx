@@ -7,13 +7,43 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import CreatePost from "./(components)/create-post";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { z } from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Send } from 'lucide-react';
 
 type PostWithAttributes = Tables<"Post"> & {
   PostImage?: Tables<"PostImage">[];
   Comment?: Tables<"Comment">[];
 };
+
+// function to create a new comment on a post
+const createComment = async (body: string,
+                             Parent_post: number,
+                             Author: string) => {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("Comment").insert([
+    {
+      body,
+      Parent_post,
+      Author,
+    },]);
+  if (error) {
+    console.error("Error creating comment", error);
+    return null;
+  }
+  return data;
+}
 
 const projectId =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
@@ -25,6 +55,53 @@ function FeedPost({
   post: PostWithAttributes;
   inline?: boolean;
 }) {
+
+  const [profileData, setProfileData] = useState<Tables<"UserProfile"> | null>(null);
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      const supabase = createClient();
+      const { data: user, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error("Error getting user:", userError);
+        return;
+      }
+
+      if (user?.user?.id) {
+        const { data, error: profileError } = await supabase
+          .from("UserProfile")
+          .select("*")
+          .eq("user_id", user.user.id as string)
+          .single();
+
+        if (profileError) {
+          console.error("Error fetching profile:", profileError);
+          return;
+        }
+        setProfileData(data as Tables<"UserProfile">);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
+
+  const formSchema = z.object({
+    body: z
+      .string()
+      .min(2, {
+        message: "Your comment must be at least 2 characters long.",
+      })
+      .max(240, {
+        message: "Your comment cannot be more than 240 characters long.",
+      }),
+  });
+    
+  const form = useForm<z.infer<typeof formSchema>>({
+      resolver: zodResolver(formSchema),
+      defaultValues: {
+        body: "",
+      },
+  });
+  const [isCommenting, setIsCommenting] = useState(0);
   const {
     isError: isAuthorError,
     data: authorData,
@@ -45,6 +122,7 @@ function FeedPost({
     },
   });
   const { 
+
     isError: isCommentError, 
     data: commentAuthorData,
     error: commentError, 
@@ -82,6 +160,15 @@ function FeedPost({
         <p>Error: {commentError.message}</p>
       </div>
     );
+
+  const focusOnPost = () => {
+    setIsCommenting(post.id);
+  };
+  
+  const unfocusOnPost = () => {
+    setIsCommenting(0);
+  };
+  
   return (
     <div
       key={post.id}
@@ -174,6 +261,60 @@ function FeedPost({
           )})}
         </>
       )}
+      <Form {...form}>
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target as HTMLFormElement);
+            const body = formData.get("body") as string;
+            const Author = String(profileData?.user_id);
+            const Parent_post = post.id;
+            await createComment(body, Parent_post, Author);
+            form.reset()
+          }}
+        >
+          <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <div className="text-sm text-neutral-400">
+                  <Avatar>
+                    <AvatarImage
+                      src={profileData?.profile_picture_url as string | undefined}
+                      alt="Avatar"
+                    />
+                    <AvatarFallback>
+                      {profileData?.display_name.toString().charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  </div>
+                  <div className="bg-neutral-700 rounded-lg"
+                       style={{padding: '.5px'}}>
+                    <div className="flex gap-2">
+                      <FormField
+                        control={form.control}
+                        name="body"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Textarea 
+                                className="bg-transparent resize-none" 
+                                onFocus={focusOnPost}
+                                placeholder="Add a comment"
+                                rows={1}
+                                style={{ outline: 'none', border: 'none', height: 'auto', minHeight: '2rem' }} 
+                                {...field}
+                                onBlur={() => unfocusOnPost()} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                    {(isCommenting == post.id || form.watch("body").length > 0) && <button type="submit"><Send /></button>}
+                </div>
+              </div>
+        </form>
+      </Form>
     </div>
   );
 }
@@ -280,7 +421,7 @@ export default function Feed({
           }
 
           if (payload.eventType === "INSERT") {
-            console.log("New image incoming!", payload.new);
+            console.log("New Comment incoming!", payload.new);
             setPosts((prev) =>
               prev.map((post) => {
                 if (post.id !== payload.new.post) return post;
