@@ -419,8 +419,8 @@ export default function FriendsList({ username }: { username: string }) {
               <ul className="">
                 {friendRequests.map((friendRequest) => (
                   <li key={friendRequest.user_id} className="">
-                    <div className="flex items-center space-x-4">
-                      <div className="relative flex w-fit items-center rounded-lg border bg-card p-4 shadow-lg transition-colors hover:bg-card/20">
+                    <div className="items-center space-x-4">
+                      <div className="relative w-fit items-center rounded-lg border bg-card p-4 shadow-lg transition-colors hover:bg-card/20">
                         <Link
                           href={`/user/${friendRequest.username}`}
                           className="flex items-center"
