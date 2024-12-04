@@ -330,7 +330,6 @@ const { isPending, data: userDetails } = useQuery({
       console.error("Error sending friend request:", error);
       return;
     }else{
-      alert("Friend request sent!");
       toast.success("Friend request sent!");
       setFriendRequestStatus("pending");
     }
