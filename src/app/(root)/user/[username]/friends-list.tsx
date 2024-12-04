@@ -220,9 +220,7 @@ export default function FriendsList({ username }: { username: string }) {
       return;
     }
 
-    const { error: insertError } = await supabase
-    .from("Friends")
-    .insert([
+    const { error: insertError } = await supabase.from("Friends").insert([
       {
         user_id1: myUserId,
         user_id2: targetUserId,
@@ -370,7 +368,7 @@ export default function FriendsList({ username }: { username: string }) {
                   <DialogTrigger asChild>
                     <Plus className="size-9 cursor-pointer rounded-full bg-primary p-2 text-primary-foreground shadow-md transition-colors hover:bg-primary/60" />
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="mx-auto w-full max-w-80">
                     <DialogHeader>
                       <DialogTitle className="scroll-m-20 text-xl font-extrabold tracking-tight lg:text-2xl">
                         Add a New Friend
