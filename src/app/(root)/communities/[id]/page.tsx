@@ -109,6 +109,9 @@ export default function Page({
         data?.map((post) => ({
           ...post,
           Comment: Array.isArray(post.Comment) ? post.Comment : [],
+          content: post.body,
+          author: post.creator,
+          createdAt: post.created_at,
         })) || [];
       setPosts(formattedData);
     }
