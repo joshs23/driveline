@@ -28,7 +28,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { set, z } from "zod";
-import { Toaster, toast } from 'sonner'
+import { Toaster, toast } from "sonner";
 
 const projectId =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
@@ -175,34 +175,34 @@ export default function FriendsList({ username }: { username: string }) {
   async function addFriend(friend: z.infer<typeof formSchema>) {
     const supabase = createClient();
     const authUser = await getAuthenticatedUser();
-  
+
     if (!authUser) {
       console.log("No authenticated user found");
       return;
     }
-  
+
     // Find the user ID for the target friend (username)
     const { data, error } = await supabase
       .from("UserProfile")
       .select("user_id")
       .eq("username", friend.username)
       .single();
-  
+
     if (data?.user_id === authUser.id) {
       setToastMessage("You can't add yourself as a friend.");
       toast("You can't add yourself as a friend."); // Display toast immediately
       return;
     }
-  
+
     if (error || !data) {
       setToastMessage("User not found.");
       toast("User not found."); // Display toast immediately
       return;
     }
-  
+
     const myUserId = authUser.id;
     const targetUserId = data.user_id;
-  
+
     // Check if there's already a pending or accepted friendship
     const { data: existingFriendship, error: friendshipError } = await supabase
       .from("Friends")
@@ -210,7 +210,7 @@ export default function FriendsList({ username }: { username: string }) {
       .eq("user_id1", myUserId)
       .eq("user_id2", targetUserId)
       .single();
-  
+
     if (
       friendshipError &&
       friendshipError.details !== "The result contains 0 rows"
@@ -218,13 +218,13 @@ export default function FriendsList({ username }: { username: string }) {
       console.log("Error checking for existing friendship:", friendshipError);
       return;
     }
-  
+
     if (existingFriendship) {
       setToastMessage("Friend request already exists or is accepted.");
       toast("Friend request already exists or is accepted."); // Display toast immediately
       return;
     }
-  
+
     const { error: insertError } = await supabase.from("Friends").insert([
       {
         user_id1: myUserId,
@@ -232,7 +232,7 @@ export default function FriendsList({ username }: { username: string }) {
         accepted: false, // Pending request
       },
     ]);
-  
+
     if (insertError) {
       console.log("Error sending friend request:", insertError);
       setToastMessage("Failed to send friend request.");
@@ -242,7 +242,6 @@ export default function FriendsList({ username }: { username: string }) {
       toast("Friend request sent to: " + friend.username); // Display toast immediately
     }
   }
-  
 
   const [friends, setFriends] = useState<
     | {
@@ -358,198 +357,204 @@ export default function FriendsList({ username }: { username: string }) {
 
   return (
     <div>
-    <Toaster />
-    <Dialog
-      open={showConfirmDelete}
-      onOpenChange={(open) => {
-        if (!open) {
-          setShowConfirmDelete(false);
-          setFriendToRemove(null);
-        }
-      }}
-    >
-      <div className="px-4">
-        <div className="flex">
-          <h2 className="py-4 text-3xl font-bold">Friends</h2>
-          {amOwner && (
-            <div className="px-4 py-4">
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogTrigger asChild>
-                  <Plus className="size-9 cursor-pointer rounded-full bg-primary p-2 text-primary-foreground shadow-md transition-colors hover:bg-primary/60" />
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="scroll-m-20 text-xl font-extrabold tracking-tight lg:text-2xl">
-                      Add a New Friend
-                    </DialogTitle>
-                  </DialogHeader>
-                  <Form {...form}>
-                    <form
-                      onSubmit={form.handleSubmit(onSubmit)}
-                      className="space-y-4"
-                    >
-                      {/* Username Field */}
-                      <FormField
-                        control={form.control}
-                        name="username"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Username<span className="">*</span>
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="username"
-                                required
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      {/* Submit Button */}
-                      <Button
-                        type="submit"
-                        className="w-full transition-colors hover:bg-primary/60"
+      <Toaster />
+      <Dialog
+        open={showConfirmDelete}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowConfirmDelete(false);
+            setFriendToRemove(null);
+          }
+        }}
+      >
+        <div className="px-4">
+          <div className="flex">
+            <h2 className="py-4 text-3xl font-bold">Friends</h2>
+            {amOwner && (
+              <div className="px-4 py-4">
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Plus className="size-9 cursor-pointer rounded-full bg-primary p-2 text-primary-foreground shadow-md transition-colors hover:bg-primary/60" />
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle className="scroll-m-20 text-xl font-extrabold tracking-tight lg:text-2xl">
+                        Add a New Friend
+                      </DialogTitle>
+                    </DialogHeader>
+                    <Form {...form}>
+                      <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="space-y-4"
                       >
-                        Submit
-                      </Button>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
-            </div>
+                        {/* Username Field */}
+                        <FormField
+                          control={form.control}
+                          name="username"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Username<span className="">*</span>
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="username"
+                                  required
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        {/* Submit Button */}
+                        <Button
+                          type="submit"
+                          className="w-full transition-colors hover:bg-primary/60"
+                        >
+                          Submit
+                        </Button>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            )}
+          </div>
+          {amOwner && friendRequests && friendRequests.length > 0 ? (
+            <>
+              <p className="text-lg font-bold">Friend Requests Pending...</p>
+              <ul className="">
+                {friendRequests.map((friendRequest) => (
+                  <li key={friendRequest.user_id} className="">
+                    <div className="flex items-center space-x-4">
+                      <div className="relative flex w-fit items-center rounded-lg border bg-card p-4 shadow-lg transition-colors hover:bg-card/20">
+                        <Link
+                          href={`/user/${friendRequest.username}`}
+                          className="flex items-center"
+                        >
+                          <Avatar className="h-12 w-12 flex-shrink-0">
+                            <AvatarImage
+                              src={
+                                friendRequest.profile_picture_url as
+                                  | string
+                                  | undefined
+                              }
+                              alt={`${friendRequest.display_name}'s avatar`}
+                              className="rounded-full"
+                            />
+                            <AvatarFallback className="flex h-full w-full items-center justify-center rounded-full font-bold">
+                              {friendRequest.display_name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="px-2">
+                            <p className="font-semibold">
+                              {friendRequest.display_name}
+                            </p>
+                            <p className="text-sm">@{friendRequest.username}</p>
+                          </div>
+                        </Link>
+                        <div className="space-x-2 space-y-2">
+                          <Button
+                            onClick={() => {
+                              handleAcceptRequest(friendRequest.user_id);
+                            }}
+                            className="bg-green-600 text-white hover:bg-green-800"
+                          >
+                            Accept
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              handleDeleteFriend(friendRequest.user_id);
+                            }}
+                            className="bg-red-500 text-white hover:bg-red-600"
+                          >
+                            Decline
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p></p>
           )}
-        </div>
-        {amOwner && friendRequests && friendRequests.length > 0 ? (
-          <>
-            <p className="text-lg font-bold">Friend Requests Pending...</p>
+          {friends && friends.length > 0 ? (
             <ul className="">
-              {friendRequests.map((friendRequest) => (
-                <li key={friendRequest.user_id} className="">
+              {friends.map((friend) => (
+                <li key={friend.user_id} className="">
                   <div className="flex items-center space-x-4">
                     <div className="relative flex w-fit items-center rounded-lg border bg-card p-4 shadow-lg transition-colors hover:bg-card/20">
-                      <Link
-                        href={`/user/${friendRequest.username}`}
-                        className="flex items-center"
-                      >
-                        <Avatar>
-                          <AvatarImage
-                            src={
-                              (friendRequest?.profile_picture_url &&
-                                `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${friendRequest.profile_picture_url}`) ||
-                              undefined
-                            }
-                            alt="Avatar"
-                          />
-                          <AvatarFallback>
-                            {friendRequest.display_name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
+                      <Link href={`/user/${friend.username}`} className="flex">
+                      <Avatar className="h-12 w-12 flex-shrink-0">
+                            <AvatarImage
+                              src={
+                                friend.profile_picture_url as
+                                  | string
+                                  | undefined
+                              }
+                              alt={`${friend.display_name}'s avatar`}
+                              className="rounded-full"
+                            />
+                            <AvatarFallback className="flex h-full w-full items-center justify-center rounded-full font-bold">
+                              {friend.display_name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
                         <div className="px-2">
-                          <p className="font-semibold">
-                            {friendRequest.display_name}
-                          </p>
-                          <p className="text-sm">@{friendRequest.username}</p>
+                          <p className="font-semibold">{friend.display_name}</p>
+                          <p className="text-sm">@{friend.username}</p>
                         </div>
                       </Link>
-                      <div className="space-x-2 space-y-2">
-                        <Button
-                          onClick={() => {
-                            handleAcceptRequest(friendRequest.user_id);
-                          }}
-                          className="bg-green-600 text-white hover:bg-green-800"
-                        >
-                          Accept
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            handleDeleteFriend(friendRequest.user_id);
-                          }}
-                          className="bg-red-500 text-white hover:bg-red-600"
-                        >
-                          Decline
-                        </Button>
-                      </div>
+                      {amOwner && (
+                        <DialogTrigger asChild>
+                          <X
+                            onClick={() => {
+                              setShowConfirmDelete(true);
+                              setFriendToRemove(friend.user_id);
+                            }}
+                            className="my-auto size-6 cursor-pointer rounded-full bg-primary p-1 shadow-md transition-colors hover:bg-primary/60"
+                          />
+                        </DialogTrigger>
+                      )}
                     </div>
                   </div>
                 </li>
               ))}
             </ul>
-          </>
-        ) : (
-          <p></p>
-        )}
-        {friends && friends.length > 0 ? (
-          <ul className="">
-            {friends.map((friend) => (
-              <li key={friend.user_id} className="">
-                <div className="flex items-center space-x-4">
-                  <div className="relative flex w-fit items-center rounded-lg border bg-card p-4 shadow-lg transition-colors hover:bg-card/20">
-                    <Link href={`/user/${friend.username}`} className="flex">
-                      <Avatar>
-                        src=
-                        {(friend?.profile_picture_url &&
-                          `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${friend.profile_picture_url}`) ||
-                          undefined}
-                        <AvatarFallback>
-                          {friend.display_name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="px-2">
-                        <p className="font-semibold">{friend.display_name}</p>
-                        <p className="text-sm">@{friend.username}</p>
-                      </div>
-                    </Link>
-                    {amOwner && (
-                      <DialogTrigger asChild>
-                        <X
-                          onClick={() => {
-                            setShowConfirmDelete(true);
-                            setFriendToRemove(friend.user_id);
-                          }}
-                          className="my-auto size-6 cursor-pointer rounded-full bg-primary p-1 shadow-md transition-colors hover:bg-primary/60"
-                        />
-                      </DialogTrigger>
-                    )}
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <></>
-        )}
-      </div>
-      {/* Confirmation Modal */}
-      <DialogContent className="w-full max-w-sm rounded-lg p-6 shadow-lg">
-        <DialogHeader>
-          <DialogTitle className="mb-4 text-xl font-semibold">
-            Confirm Deletion
-          </DialogTitle>
-          <DialogDescription className="mb-4 text-sm">
-            Are you sure?
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex justify-end gap-4">
-          <DialogClose asChild>
+          ) : (
+            <></>
+          )}
+        </div>
+        {/* Confirmation Modal */}
+        <DialogContent className="w-full max-w-sm rounded-lg p-6 shadow-lg">
+          <DialogHeader>
+            <DialogTitle className="mb-4 text-xl font-semibold">
+              Confirm Deletion
+            </DialogTitle>
+            <DialogDescription className="mb-4 text-sm">
+              Are you sure?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-4">
+            <DialogClose asChild>
+              <Button
+                onClick={cancelDelete}
+                className="rounded-md px-4 py-2 transition-colors hover:bg-primary/60"
+              >
+                Cancel
+              </Button>
+            </DialogClose>
             <Button
-              onClick={cancelDelete}
+              onClick={handleDelete}
               className="rounded-md px-4 py-2 transition-colors hover:bg-primary/60"
             >
-              Cancel
+              Confirm
             </Button>
-          </DialogClose>
-          <Button
-            onClick={handleDelete}
-            className="rounded-md px-4 py-2 transition-colors hover:bg-primary/60"
-          >
-            Confirm
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
