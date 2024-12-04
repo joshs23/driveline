@@ -214,10 +214,7 @@ function CommentSection({ post }: { post: PostWithAttributes }) {
                   </AvatarFallback>
                 </Avatar>
               </div>
-              <div
-                className="rounded-lg bg-neutral-700"
-                style={{ padding: ".5px" }}
-              >
+              <div className="rounded-lg bg-neutral-700">
                 <div className="flex gap-2">
                   <FormField
                     control={form.control}
