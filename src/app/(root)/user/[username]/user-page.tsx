@@ -7,6 +7,7 @@ import { LoaderCircle } from "lucide-react";
 import { notFound, redirect, usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button"; // Adjust the import path as necessary
 
 const projectId =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
@@ -226,7 +227,17 @@ function ProfilePicture({
 }
 
 export default function UserPage({ username }: { username: string }) {
-  const { isPending, data: userDetails } = useQuery({
+  const [currentUserId, setCurrentUserId] = useState<string>();
+  const [friendRequestStatus, setFriendRequestStatus] = useState<string>();
+  const [showFriendButton, setShowFriendButton] = useState({
+                                                  show: false,
+                                                  color: "",
+                                                  message: "",});
+  useEffect(() => {
+    getCurrentUser().then((data) => setCurrentUserId(data?.user?.id));
+  }, []);
+
+const { isPending, data: userDetails } = useQuery({
     queryKey: ["username", username],
     queryFn: async () => {
       const supabase = createClient();
@@ -242,6 +253,63 @@ export default function UserPage({ username }: { username: string }) {
     },
   });
 
+  useEffect(() => {
+    if (currentUserId && userDetails?.user_id) {
+      const supabase = createClient();
+      supabase
+        .from("Friends")
+        .select("*")
+        .eq("user_id1", currentUserId)
+        .eq("user_id2", userDetails.user_id)
+        .then(({ data, error }) => {
+          if (error) {
+            console.error("Error fetching friend request status:", error);
+            return;
+          }
+          if (data.length > 0) {
+            if (data[0].accepted) {
+              setFriendRequestStatus("accepted");
+            } else {
+              setFriendRequestStatus("pending");
+            }
+          } else {
+            supabase
+              .from("Friends")
+              .select("*")
+              .eq("user_id1", userDetails.user_id)
+              .eq("user_id2", currentUserId)
+              .then(({ data, error }) => {
+                if (error) {
+                  console.error("Error fetching friend request status:", error);
+                  return;
+                }
+                if (data.length > 0) {
+                  if (data[0].accepted) {
+                    setFriendRequestStatus("accepted");
+                  } else {
+                    setFriendRequestStatus("pending");
+                  }
+                } else {
+                  setFriendRequestStatus("none");
+                }
+              });
+          }
+        });
+    }
+  }, [currentUserId, userDetails, friendRequestStatus]);
+
+  useEffect(() => {
+    if (friendRequestStatus === "accepted") {
+       setShowFriendButton({ show: false, color: "", message: "" });
+     } else if (friendRequestStatus === "pending") {
+       setShowFriendButton({ show: true, color: "bg-yellow-500", message: "Pending" });
+     } else if (friendRequestStatus === "none") {
+       setShowFriendButton({ show: true, color: "bg-red-500", message: "Add friend" });
+     }
+   }, [friendRequestStatus]);
+
+  
+
   if (isPending)
     return (
       <div className="flex min-h-screen w-full items-center justify-center">
@@ -250,6 +318,23 @@ export default function UserPage({ username }: { username: string }) {
     );
 
   if (!userDetails) notFound();
+
+  const requestFriend = (userDetails: Tables<"UserProfile">) => async () => {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("Friends")
+      .insert([{ user_id1: currentUserId, user_id2: userDetails.user_id, accepted: false }])
+      .single();
+
+    if (error) {
+      console.error("Error sending friend request:", error);
+      return;
+    }else{
+      alert("Friend request sent!");
+      toast.success("Friend request sent!");
+      setFriendRequestStatus("pending");
+    }
+  };
 
   return (
     <div className="w-full">
@@ -262,6 +347,14 @@ export default function UserPage({ username }: { username: string }) {
       <div className="mt-20 text-center">
         <h1 className="text-2xl font-semibold">{userDetails.display_name}</h1>
         <p className="text-lg">@{username}</p>
+        {showFriendButton.show ? (
+          <div className="pt-2">
+            <Button variant="fr" className={`text-lg hover:none ${showFriendButton.color}`}
+                    onClick={friendRequestStatus == "none" ? requestFriend(userDetails) : () => {}}>
+              {showFriendButton.message}
+            </Button>
+          </div>
+        ) : null}
       </div>
     </div>
   );
