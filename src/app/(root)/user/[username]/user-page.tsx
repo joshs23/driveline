@@ -367,7 +367,7 @@ export default function UserPage({ username }: { username: string }) {
   return (
     <div className="w-full">
       {/* Header Section */}
-      <div className="relative h-[25rem] w-full border-b border-zinc-600">
+      <div className="relative h-[19rem] w-full border-b border-zinc-600">
         <Banner userDetails={userDetails} />
         <ProfilePicture userDetails={userDetails} />
       </div>
