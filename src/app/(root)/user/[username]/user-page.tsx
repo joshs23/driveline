@@ -230,14 +230,15 @@ export default function UserPage({ username }: { username: string }) {
   const [currentUserId, setCurrentUserId] = useState<string>();
   const [friendRequestStatus, setFriendRequestStatus] = useState<string>();
   const [showFriendButton, setShowFriendButton] = useState({
-                                                  show: false,
-                                                  color: "",
-                                                  message: "",});
+    show: false,
+    color: "",
+    message: "",
+  });
   useEffect(() => {
     getCurrentUser().then((data) => setCurrentUserId(data?.user?.id));
   }, []);
 
-const { isPending, data: userDetails } = useQuery({
+  const { isPending, data: userDetails } = useQuery({
     queryKey: ["username", username],
     queryFn: async () => {
       const supabase = createClient();
@@ -300,15 +301,21 @@ const { isPending, data: userDetails } = useQuery({
 
   useEffect(() => {
     if (friendRequestStatus === "accepted") {
-       setShowFriendButton({ show: false, color: "", message: "" });
-     } else if (friendRequestStatus === "pending") {
-       setShowFriendButton({ show: true, color: "bg-yellow-500", message: "Pending" });
-     } else if (friendRequestStatus === "none") {
-       setShowFriendButton({ show: true, color: "bg-red-500", message: "Add friend" });
-     }
-   }, [friendRequestStatus]);
-
-  
+      setShowFriendButton({ show: false, color: "", message: "" });
+    } else if (friendRequestStatus === "pending") {
+      setShowFriendButton({
+        show: true,
+        color: "bg-yellow-500",
+        message: "Pending",
+      });
+    } else if (friendRequestStatus === "none") {
+      setShowFriendButton({
+        show: true,
+        color: "bg-red-500",
+        message: "Add friend",
+      });
+    }
+  }, [friendRequestStatus]);
 
   if (isPending)
     return (
@@ -323,13 +330,19 @@ const { isPending, data: userDetails } = useQuery({
     const supabase = createClient();
     const { data, error } = await supabase
       .from("Friends")
-      .insert([{ user_id1: currentUserId, user_id2: userDetails.user_id, accepted: false }])
+      .insert([
+        {
+          user_id1: currentUserId,
+          user_id2: userDetails.user_id,
+          accepted: false,
+        },
+      ])
       .single();
 
     if (error) {
       console.error("Error sending friend request:", error);
       return;
-    }else{
+    } else {
       toast.success("Friend request sent!");
       setFriendRequestStatus("pending");
     }
@@ -348,8 +361,15 @@ const { isPending, data: userDetails } = useQuery({
         <p className="text-lg">@{username}</p>
         {showFriendButton.show ? (
           <div className="pt-2">
-            <Button variant="fr" className={`text-lg hover:none ${showFriendButton.color}`}
-                    onClick={friendRequestStatus == "none" ? requestFriend(userDetails) : () => {}}>
+            <Button
+              variant="fr"
+              className={`hover:none text-lg ${showFriendButton.color}`}
+              onClick={
+                friendRequestStatus == "none"
+                  ? requestFriend(userDetails)
+                  : () => {}
+              }
+            >
               {showFriendButton.message}
             </Button>
           </div>
