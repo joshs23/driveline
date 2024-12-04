@@ -10,11 +10,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { createClient } from "@/utils/supabase/server";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import SignOut from "@/app/(root)/(components)/sign-out";
 import CreatePost from "./create-post";
+import UserButtonDetails from "./user-button";
 
 const routes = [
   { name: "Home", href: "/" },
@@ -47,23 +47,7 @@ async function UserButton() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex w-full items-center gap-2 rounded-md border px-4 py-2 shadow-lg">
-        <Avatar className="border-2 shadow-md">
-          <AvatarImage
-            src={
-              (profileData?.profile_picture_url &&
-                `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${profileData.profile_picture_url}`) ||
-              undefined
-            }
-            alt="Avatar"
-          />
-          <AvatarFallback>{profileData.display_name.charAt(0)}</AvatarFallback>
-        </Avatar>
-        <div className="flex flex-col text-left">
-          <p className="font-bold">{profileData.display_name}</p>
-          <p className="text-sm">@{profileData.username}</p>
-        </div>
-      </DropdownMenuTrigger>
+      <UserButtonDetails />
       <DropdownMenuContent>
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
