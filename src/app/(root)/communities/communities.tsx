@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
+import CreateCommunity from "./createcommunity";
 
 async function countMembers(communityId: number) {
   const supabase = await createClient();
@@ -29,7 +30,10 @@ export default async function Communities() {
 
   return (
     <div className="container w-fit py-8">
-      <h1 className="mb-2 text-3xl font-semibold">Communities</h1>
+      <div className="flex gap-4">
+        <h1 className="mb-2 text-3xl font-semibold">Communities</h1>
+        <CreateCommunity />
+      </div>
       <p className="mb-4 opacity-70">Find your people!</p>
       <div className="flex gap-4">
         {listings.map((listing) => (

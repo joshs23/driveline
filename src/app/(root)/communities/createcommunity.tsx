@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Description } from "@radix-ui/react-dialog";
 
 async function getUser() {
   const supabase = createClient();
@@ -33,18 +34,15 @@ async function getUser() {
   return data;
 }
 
-async function insertVehicle(vehicle: z.infer<typeof formSchema>) {
+async function insertVehicle(community: z.infer<typeof formSchema>) {
   const supabase = createClient();
   const user = await getUser();
   const { data, error } = await supabase
-    .from("Vehicle")
+    .from("Community")
     .insert([
       {
-        owner: user?.user?.id,
-        make: vehicle.make,
-        model: vehicle.model,
-        year: Number(vehicle.year),
-        color: vehicle.color,
+        name: community.name,
+        description: community.description,
       },
     ])
     .select();
@@ -55,25 +53,18 @@ async function insertVehicle(vehicle: z.infer<typeof formSchema>) {
 }
 
 const formSchema = z.object({
-  make: z.string(),
-  model: z.string(),
-  year: z
-    .string()
-    .length(4, { message: "Invalid year, must be of format: YYYY" })
-    .refine((val) => !isNaN(Number(val)), { message: "Invalid year" }),
-  color: z.string().optional(),
+  name: z.string(),
+  description: z.string(),
 });
 
-export default function CreateVehicle() {
+export default function CreateCommunity() {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      make: "",
-      model: "",
-      year: "",
-      color: "",
+      name: "",
+      description: "",
     },
   });
 
@@ -92,77 +83,46 @@ export default function CreateVehicle() {
       <DialogContent className="w-1/3">
         <DialogHeader>
           <DialogTitle className="scroll-m-20 text-xl font-extrabold tracking-tight lg:text-2xl">
-            Add a New Vehicle
+            Make a New Community
           </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Make Field */}
+            {/* Name Field */}
             <FormField
               control={form.control}
-              name="make"
+              name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Make<span className="text-red-500">*</span>
+                    Name<span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Dodge" required {...field} />
+                    <Input placeholder="Community Name" required {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Model Field */}
+            {/* Discription Field */}
             <FormField
               control={form.control}
-              name="model"
+              name="description"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Model<span className="text-red-500">*</span>
+                    Description<span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Charger" required {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Year Field */}
-            <FormField
-              control={form.control}
-              name="year"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Year<span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="2018"
+                    <textarea
+                      className="min-h-[100px] w-full rounded-md border border-gray-300 bg-background p-2 text-sm text-foreground shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                      placeholder="Brief description of the community"
                       required
                       {...field}
+                      rows={3}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Color Field (Optional) */}
-            <FormField
-              control={form.control}
-              name="color"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Color</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Blue" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
