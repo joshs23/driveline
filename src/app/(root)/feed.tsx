@@ -338,7 +338,7 @@ function FeedPost({
       </div>
       <p className="leading-7">{post.body}</p>
       {post.PostImage && post.PostImage?.length > 0 && (
-        <div className="flex w-full gap-8">
+        <div className="flex w-full flex-wrap gap-8">
           {post.PostImage?.map((image) => (
             <img
               key={image.id}
