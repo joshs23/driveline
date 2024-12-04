@@ -217,8 +217,8 @@ function ProfilePicture({
           className="h-full w-full rounded-full border-4 border-border bg-secondary object-cover shadow-md"
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center rounded-full border-4 border-white bg-gray-300 shadow-md">
-          <p className="text-gray-500">No Profile Pic</p>
+        <div className="flex h-full w-full items-center justify-center rounded-full border-4 border-border bg-secondary font-semibold shadow-md">
+          No Profile Pic
         </div>
       )}
     </div>
