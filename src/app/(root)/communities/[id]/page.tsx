@@ -14,25 +14,14 @@ export default function Page({ params }: { params: { id: string } }) {
   const [members, setMembers] = useState<any[]>([]);
   const [memberProfiles, setMemberProfiles] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
+  const [memberIds, setMemberIds] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       const { id } = await params;
       const supabase = await createClient();
 
-      const { data, error } = await supabase
-        .from("Post")
-        .select("*, PostImage(*), Comment(*)")
-        .order("id", { ascending: false });
-      if (error) {
-        console.error(error);
-      }
-      const formattedData =
-        data?.map((post) => ({
-          ...post,
-          Comment: Array.isArray(post.Comment) ? post.Comment : [],
-        })) || [];
-      setPosts(formattedData);
+
 
       const { data: communityData } = await supabase
         .from("Community")
@@ -68,10 +57,32 @@ export default function Page({ params }: { params: { id: string } }) {
         .select("*")
         .in("user_id", membersData?.map((member) => member.user_id) || []);
       setMemberProfiles(profiles || []);
+      setMemberIds(membersData?.map((member) => member.user_id) || []);
     };
 
     fetchData();
   }, [params]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    async function getData() {
+      const { data, error } = await supabase
+        .from("Post")
+        .select("*, PostImage(*), Comment(*)")
+        .in("creator", memberIds)
+        .order("id", { ascending: false });
+      if (error) {
+        console.error(error);
+      }
+      const formattedData =
+        data?.map((post) => ({
+          ...post,
+          Comment: Array.isArray(post.Comment) ? post.Comment : [],
+        })) || [];
+      setPosts(formattedData);
+    }
+    getData();
+  }, [memberIds]);
 
   const handleJoin = async () => {
     const supabase = await createClient();
@@ -138,7 +149,8 @@ export default function Page({ params }: { params: { id: string } }) {
           {/* Feed */}
           <div className="mt-4 flex items-center justify-between border-4 p-4">
             <h1 className="px-6 pt-4 text-3xl font-bold">Feed</h1>
-            {posts.length > 0 ? <Feed initalPosts={posts} /> : <p>Loading posts...</p>}
+            {posts.length > 0 ? <Feed initalPosts={posts} 
+                                      feedUserId={memberIds}/> : <p>Loading posts...</p>}
           </div>
           {/* Members Section */}
           <div className="mt-4 flex items-center justify-between border-4 p-4">
