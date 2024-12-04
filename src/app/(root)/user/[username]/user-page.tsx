@@ -8,6 +8,7 @@ import { notFound, redirect, usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button"; // Adjust the import path as necessary
+import { IconFriends } from "@tabler/icons-react";
 
 const projectId =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
@@ -370,7 +371,7 @@ export default function UserPage({ username }: { username: string }) {
                   : () => {}
               }
             >
-              {showFriendButton.message}
+              <IconFriends /> {showFriendButton.message}
             </Button>
           </div>
         ) : null}
