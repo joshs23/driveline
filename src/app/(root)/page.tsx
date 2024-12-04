@@ -11,5 +11,10 @@ export default async function Home() {
     console.error(error);
   }
 
-  return <Feed initalPosts={data} />;
+  const formattedData = data?.map(post => ({
+    ...post,
+    Comment: Array.isArray(post.Comment) ? post.Comment : []
+  })) || null;
+
+  return <Feed initalPosts={formattedData} />;
 }
