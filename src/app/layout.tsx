@@ -30,7 +30,7 @@ export default async function RootLayout({
             {children}
           </div>
         </Providers>
-        <Toaster />
+        <Toaster richColors />
       </body>
     </html>
   );
