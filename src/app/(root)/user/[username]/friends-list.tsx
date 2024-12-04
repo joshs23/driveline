@@ -27,8 +27,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { set, z } from "zod";
-import { Toaster, toast } from "sonner";
+import { z } from "zod";
+import { toast } from "sonner";
 
 const projectId =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
@@ -170,8 +170,6 @@ const formSchema = z.object({
 });
 
 export default function FriendsList({ username }: { username: string }) {
-  const [toastMessage, setToastMessage] = useState("");
-
   async function addFriend(friend: z.infer<typeof formSchema>) {
     const supabase = createClient();
     const authUser = await getAuthenticatedUser();
@@ -189,13 +187,11 @@ export default function FriendsList({ username }: { username: string }) {
       .single();
 
     if (data?.user_id === authUser.id) {
-      setToastMessage("You can't add yourself as a friend.");
       toast("You can't add yourself as a friend."); // Display toast immediately
       return;
     }
 
     if (error || !data) {
-      setToastMessage("User not found.");
       toast("User not found."); // Display toast immediately
       return;
     }
@@ -220,7 +216,6 @@ export default function FriendsList({ username }: { username: string }) {
     }
 
     if (existingFriendship) {
-      setToastMessage("Friend request already exists or is accepted.");
       toast("Friend request already exists or is accepted."); // Display toast immediately
       return;
     }
@@ -235,10 +230,8 @@ export default function FriendsList({ username }: { username: string }) {
 
     if (insertError) {
       console.log("Error sending friend request:", insertError);
-      setToastMessage("Failed to send friend request.");
       toast("Failed to send friend request."); // Display toast immediately
     } else {
-      setToastMessage("Friend request sent to: " + friend.username);
       toast("Friend request sent to: " + friend.username); // Display toast immediately
     }
   }
@@ -357,7 +350,6 @@ export default function FriendsList({ username }: { username: string }) {
 
   return (
     <div>
-      <Toaster />
       <Dialog
         open={showConfirmDelete}
         onOpenChange={(open) => {
