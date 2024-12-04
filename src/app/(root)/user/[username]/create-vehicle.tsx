@@ -87,7 +87,7 @@ export default function CreateVehicle() {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Plus className="size-10 cursor-pointer rounded-full bg-primary p-2 text-primary-foreground shadow-md transition-colors hover:bg-primary/90" />
+        <Plus className="size-9 cursor-pointer rounded-full bg-primary p-2 text-primary-foreground shadow-md transition-colors hover:bg-primary/60" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -105,7 +105,7 @@ export default function CreateVehicle() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Make<span className="text-red-500">*</span>
+                    Make<span className="">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input placeholder="Dodge" required {...field} />
@@ -122,7 +122,7 @@ export default function CreateVehicle() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Model<span className="text-red-500">*</span>
+                    Model<span className="">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input placeholder="Charger" required {...field} />
@@ -139,7 +139,7 @@ export default function CreateVehicle() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Year<span className="text-red-500">*</span>
+                    Year<span className="">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -170,7 +170,7 @@ export default function CreateVehicle() {
             />
 
             {/* Submit Button */}
-            <Button type="submit" className="w-full transition-colors">
+            <Button type="submit" className="w-full transition-colors hover:bg-primary/60">
               Submit
             </Button>
           </form>

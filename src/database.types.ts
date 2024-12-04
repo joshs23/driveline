@@ -30,6 +30,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      Friends: {
+        Row: {
+          accepted: boolean | null
+          id: number
+          user_id1: string | null
+          user_id2: string | null
+        }
+        Insert: {
+          accepted?: boolean | null
+          id?: number
+          user_id1?: string | null
+          user_id2?: string | null
+        }
+        Update: {
+          accepted?: boolean | null
+          id?: number
+          user_id1?: string | null
+          user_id2?: string | null
+        }
+        Relationships: []
+      }
       Post: {
         Row: {
           body: string;
