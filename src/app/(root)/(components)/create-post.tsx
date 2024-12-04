@@ -148,7 +148,7 @@ export default function CreatePost({ inFlow }: { inFlow?: boolean }) {
       <DialogTrigger
         className={cn(
           !inFlow && "absolute bottom-4 right-4",
-          "flex cursor-pointer items-center rounded-full border bg-primary/70 px-4 py-2 text-2xl font-bold text-primary-foreground shadow-md outline outline-primary-foreground transition-colors hover:bg-primary/90",
+          "flex cursor-pointer items-center rounded-lg border-b-[1px] border-b-white bg-primary/80 px-4 py-2 text-2xl font-bold text-primary-foreground shadow-md transition-all hover:-translate-y-[2px] hover:border-b-[3px] hover:bg-primary/90",
         )}
       >
         <Plus className="mr-2 size-8 cursor-pointer" />
@@ -196,7 +196,7 @@ export default function CreatePost({ inFlow }: { inFlow?: boolean }) {
 
             <Button
               type="submit"
-              className="h-20 w-full text-xl [&_svg]:size-10"
+              className="h-20 w-full rounded-md border-b-[4px] border-b-white text-xl transition-all hover:-translate-y-[2px] hover:border-b-[6px] [&_svg]:size-10"
             >
               {(loading && <IconLoader2 className="animate-spin" />) ||
                 "Create Post"}

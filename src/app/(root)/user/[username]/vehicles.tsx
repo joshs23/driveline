@@ -14,7 +14,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { set } from "zod";
+import { useQueryClient } from "@tanstack/react-query";
+
+const queryClient = useQueryClient();
 
 async function getViewedUser({ username }: { username: string }) {
   const supabase = createClient();
@@ -69,6 +71,8 @@ async function deleteVehicle(vehicleId: string) {
     console.error("Error deleting vehicle:", error);
     return false;
   }
+
+  queryClient.invalidateQueries({ queryKey: ["client_vehicles"] });
   return true;
 }
 
@@ -150,7 +154,7 @@ export default function Vehicles({ username }: { username: string }) {
           {vehicles?.map((vehicle) => (
             <li
               key={vehicle.id}
-              className="relative flex w-fit items-center rounded-lg border p-4 shadow-lg bg-card "
+              className="relative flex w-fit items-center rounded-lg border bg-card p-4 shadow-lg"
             >
               <div>
                 <div className="flex items-center justify-between">
@@ -161,9 +165,7 @@ export default function Vehicles({ username }: { username: string }) {
                   </div>
                 </div>
                 {vehicle.color && (
-                  <p className="text-sm">
-                    Color: {vehicle.color}
-                  </p>
+                  <p className="text-sm">Color: {vehicle.color}</p>
                 )}
               </div>
 

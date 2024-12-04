@@ -11,40 +11,40 @@ export type Database = {
     Tables: {
       Comment: {
         Row: {
-          Author: string;
+          author_id: string;
           body: string;
           created_at: string;
           edited: boolean;
           id: number;
-          Parent_post: number;
+          post_id: number;
         };
         Insert: {
-          Author: string;
+          author_id: string;
           body: string;
           created_at?: string;
           edited?: boolean;
           id?: number;
-          Parent_post: number;
+          post_id: number;
         };
         Update: {
-          Author?: string;
+          author_id?: string;
           body?: string;
           created_at?: string;
           edited?: boolean;
           id?: number;
-          Parent_post?: number;
+          post_id?: number;
         };
         Relationships: [
           {
             foreignKeyName: "Comment_Author_fkey";
-            columns: ["Author"];
+            columns: ["author_id"];
             isOneToOne: false;
             referencedRelation: "UserProfile";
             referencedColumns: ["user_id"];
           },
           {
             foreignKeyName: "Comment_Parent_post_fkey";
-            columns: ["Parent_post"];
+            columns: ["post_id"];
             isOneToOne: false;
             referencedRelation: "Post";
             referencedColumns: ["id"];
@@ -76,21 +76,18 @@ export type Database = {
         Row: {
           community_id: number;
           created_at: string;
-          creator_id: string;
           id: number;
           user_id: string;
         };
         Insert: {
           community_id: number;
           created_at?: string;
-          creator_id: string;
           id?: number;
           user_id: string;
         };
         Update: {
           community_id?: number;
           created_at?: string;
-          creator_id?: string;
           id?: number;
           user_id?: string;
         };

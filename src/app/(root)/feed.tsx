@@ -7,7 +7,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import CreatePost from "./(components)/create-post";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
@@ -21,24 +20,20 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Send } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 type PostWithAttributes = Tables<"Post"> & {
   PostImage?: Tables<"PostImage">[];
   Comment?: Tables<"Comment">[];
 };
 
-// function to create a new comment on a post
-async function createComment(
-  body: string,
-  Parent_post: number,
-  Author: string,
-) {
+async function createComment(body: string, post_id: number, author_id: string) {
   const supabase = createClient();
   const { data, error } = await supabase.from("Comment").insert([
     {
       body,
-      Parent_post,
-      Author,
+      post_id,
+      author_id,
     },
   ]);
   if (error) {
@@ -62,42 +57,8 @@ const formSchema = z.object({
     }),
 });
 
-function FeedPost({
-  post,
-  inline,
-}: {
-  post: PostWithAttributes;
-  inline?: boolean;
-}) {
-  const [profileData, setProfileData] = useState<Tables<"UserProfile"> | null>(
-    null,
-  );
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      const supabase = createClient();
-      const { data: user, error: userError } = await supabase.auth.getUser();
-      if (userError) {
-        console.error("Error getting user:", userError);
-        return;
-      }
-
-      if (user?.user?.id) {
-        const { data, error: profileError } = await supabase
-          .from("UserProfile")
-          .select("*")
-          .eq("user_id", user.user.id as string)
-          .single();
-
-        if (profileError) {
-          console.error("Error fetching profile:", profileError);
-          return;
-        }
-        setProfileData(data as Tables<"UserProfile">);
-      }
-    };
-
-    fetchProfileData();
-  }, []);
+function CommentSection({ post }: { post: PostWithAttributes }) {
+  const supabase = createClient();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -105,13 +66,205 @@ function FeedPost({
       body: "",
     },
   });
+
   const [isCommenting, setIsCommenting] = useState(0);
+
+  const {
+    data: commentAuthorData,
+    isError: isCommentError,
+    error: commentError,
+  } = useQuery({
+    queryKey: ["comment_users", post.Comment],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("UserProfile")
+        .select("*")
+        .in("user_id", post.Comment?.map((comment) => comment.author_id) || []);
+
+      if (error) console.error("Error retrieving comment details", error);
+
+      return data;
+    },
+  });
+
+  const {
+    data: currentUserData,
+    isError: isCurrentUserError,
+    error: currentUserError,
+  } = useQuery({
+    queryKey: ["client_user"],
+    queryFn: async () => {
+      const { data: authUser } = await supabase.auth.getUser();
+
+      if (!authUser || !authUser.user) return;
+
+      const { data, error } = await supabase
+        .from("UserProfile")
+        .select("*")
+        .eq("user_id", authUser.user.id)
+        .single();
+
+      if (error) console.error("Error retrieving user details", error);
+
+      return data;
+    },
+  });
+
+  const focusOnPost = () => {
+    setIsCommenting(post.id);
+  };
+
+  const unfocusOnPost = () => {
+    setIsCommenting(0);
+  };
+
+  if (isCurrentUserError)
+    return (
+      <div
+        key={post.id}
+        className="flex w-full flex-col gap-2 border-b bg-card p-4 shadow-lg"
+      >
+        <p>Error: {currentUserError.message}</p>
+      </div>
+    );
+
+  if (isCommentError)
+    return (
+      <div
+        key={post.id}
+        className="flex w-full flex-col gap-2 border-b bg-card p-4 shadow-lg"
+      >
+        <p>Error: {commentError.message}</p>
+      </div>
+    );
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!currentUserData) return;
+
+    await createComment(values.body, post.id, currentUserData.user_id);
+    form.reset();
+  }
+
+  return (
+    <>
+      {post.Comment && post.Comment?.length > 0 && (
+        <>
+          {post.Comment.map((comment) => {
+            const commentAuthor = commentAuthorData?.find(
+              (author) => author.user_id === comment.author_id,
+            );
+            return (
+              <div key={comment.id} className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <div className="text-sm text-neutral-400">
+                    <Link href={`/user/${commentAuthor?.username}`} passHref>
+                      <Avatar>
+                        <AvatarImage
+                          src={
+                            (commentAuthor?.profile_picture_url &&
+                              `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${commentAuthor.profile_picture_url}`) ||
+                            undefined
+                          }
+                          alt="Avatar"
+                        />
+                        <AvatarFallback>
+                          {commentAuthor?.display_name.toString().charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Link>
+                  </div>
+                  <div className="rounded-lg bg-neutral-700 p-2">
+                    <div className="flex gap-2">
+                      <p>{comment.body}</p>
+                      <Link href={`/user/${commentAuthor?.username}`} passHref>
+                        <p className="text-sm text-neutral-400">
+                          @{commentAuthor?.username}
+                        </p>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </>
+      )}
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <div className="text-sm text-neutral-400">
+                <Avatar>
+                  <AvatarImage
+                    src={
+                      (currentUserData?.profile_picture_url &&
+                        `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${currentUserData.profile_picture_url}`) ||
+                      undefined
+                    }
+                    alt="Avatar"
+                  />
+                  <AvatarFallback>
+                    {currentUserData?.display_name.toString().charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              <div
+                className="rounded-lg bg-neutral-700"
+                style={{ padding: ".5px" }}
+              >
+                <div className="flex gap-2">
+                  <FormField
+                    control={form.control}
+                    name="body"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            className="resize-none bg-transparent"
+                            onFocus={focusOnPost}
+                            placeholder="Leave a comment!"
+                            style={{
+                              outline: "none",
+                              height: "auto",
+                              minHeight: "2rem",
+                            }}
+                            {...field}
+                            onBlur={() => unfocusOnPost()}
+                          />
+                        </FormControl>
+                        {/* <FormMessage /> */}
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              {(isCommenting == post.id || form.watch("body").length > 0) && (
+                <button type="submit">
+                  <Send />
+                </button>
+              )}
+            </div>
+          </div>
+        </form>
+      </Form>
+    </>
+  );
+}
+
+function FeedPost({
+  post,
+  inline,
+}: {
+  post: PostWithAttributes;
+  inline?: boolean;
+}) {
   const {
     data: authorData,
     isError: isAuthorError,
     error: authorError,
   } = useQuery({
-    queryKey: ["author_id", post.creator],
+    queryKey: ["user_id", post.creator],
     queryFn: async () => {
       const supabase = createClient();
       const { data, error } = await supabase
@@ -126,25 +279,6 @@ function FeedPost({
     },
   });
 
-  const {
-    data: commentAuthorData,
-    isError: isCommentError,
-    error: commentError,
-  } = useQuery({
-    queryKey: ["comment_author", post.Comment],
-    queryFn: async () => {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from("UserProfile")
-        .select("*")
-        .in("user_id", post.Comment?.map((comment) => comment.Author) || []);
-
-      if (error) console.error("Error retrieving comment details", error);
-
-      return data;
-    },
-  });
-
   if (isAuthorError)
     return (
       <div
@@ -154,24 +288,6 @@ function FeedPost({
         <p>Error: {authorError.message}</p>
       </div>
     );
-
-  if (isCommentError)
-    return (
-      <div
-        key={post.id}
-        className="flex w-full flex-col gap-2 border-b bg-card p-4 shadow-lg"
-      >
-        <p>Error: {commentError.message}</p>
-      </div>
-    );
-
-  const focusOnPost = () => {
-    setIsCommenting(post.id);
-  };
-
-  const unfocusOnPost = () => {
-    setIsCommenting(0);
-  };
 
   return (
     <div
@@ -222,7 +338,7 @@ function FeedPost({
       </div>
       <p className="leading-7">{post.body}</p>
       {post.PostImage && post.PostImage?.length > 0 && (
-        <div className="flex w-full gap-8">
+        <div className="flex w-full flex-wrap gap-8">
           {post.PostImage?.map((image) => (
             <img
               key={image.id}
@@ -232,118 +348,7 @@ function FeedPost({
           ))}
         </div>
       )}
-      {post.Comment && post.Comment?.length > 0 && (
-        <>
-          {post.Comment.map((comment) => {
-            const commentAuthor = commentAuthorData?.find(
-              (author) => author.user_id === comment.Author,
-            );
-            return (
-              <div key={comment.id} className="flex flex-col">
-                <div className="flex items-center gap-2">
-                  <div className="text-sm text-neutral-400">
-                    <Link href={`/user/${commentAuthor?.username}`} passHref>
-                      <Avatar>
-                        <AvatarImage
-                          src={
-                            (commentAuthor?.profile_picture_url &&
-                              `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${commentAuthor.profile_picture_url}`) ||
-                            undefined
-                          }
-                          alt="Avatar"
-                        />
-                        <AvatarFallback>
-                          {commentAuthor?.display_name.toString().charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Link>
-                  </div>
-                  <div className="rounded-lg bg-neutral-700 p-2">
-                    <div className="flex gap-2">
-                      <p>{comment.body}</p>
-                      <Link href={`/user/${commentAuthor?.username}`} passHref>
-                        <p className="text-sm text-neutral-400">
-                          @{commentAuthor?.username}
-                        </p>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </>
-      )}
-      <Form {...form}>
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target as HTMLFormElement);
-            const body = formData.get("body") as string;
-            const Author = String(profileData?.user_id);
-            const Parent_post = post.id;
-            await createComment(body, Parent_post, Author);
-            form.reset();
-          }}
-        >
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <div className="text-sm text-neutral-400">
-                <Avatar>
-                  <AvatarImage
-                    src={
-                      (profileData?.profile_picture_url &&
-                        `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${profileData.profile_picture_url}`) ||
-                      undefined
-                    }
-                    alt="Avatar"
-                  />
-                  <AvatarFallback>
-                    {profileData?.display_name.toString().charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-              <div
-                className="rounded-lg bg-neutral-700"
-                style={{ padding: ".5px" }}
-              >
-                <div className="flex gap-2">
-                  <FormField
-                    control={form.control}
-                    name="body"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Textarea
-                            className="resize-none bg-transparent"
-                            onFocus={focusOnPost}
-                            placeholder="Add a comment"
-                            rows={1}
-                            style={{
-                              outline: "none",
-                              border: "none",
-                              height: "auto",
-                              minHeight: "2rem",
-                            }}
-                            {...field}
-                            onBlur={() => unfocusOnPost()}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-              {(isCommenting == post.id || form.watch("body").length > 0) && (
-                <button type="submit">
-                  <Send />
-                </button>
-              )}
-            </div>
-          </div>
-        </form>
-      </Form>
+      <CommentSection post={post} />
     </div>
   );
 }
@@ -462,7 +467,7 @@ export default function Feed({
             console.log("New Comment incoming!", payload.new);
             setPosts((prev) =>
               prev.map((post) => {
-                if (post.id !== payload.new.Parent_post) return post;
+                if (post.id !== payload.new.post_id) return post;
 
                 return {
                   ...post,
