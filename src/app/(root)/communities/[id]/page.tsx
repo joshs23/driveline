@@ -160,7 +160,7 @@ export default function Page({
             <p className="mb-6">{community?.description}</p>
           </div>
           {/* Actions Section */}
-          <div>
+          <div className="p-6">
             {/* Join/Leave buttons */}
             {!amMember ? (
               <Button
@@ -181,7 +181,7 @@ export default function Page({
         </div>
         <div className="flex gap-8">
           {/* Feed */}
-          <div className="mt-4 flex items-center justify-between border-4 p-4">
+          <div className="mt-4 items-center justify-between border-4 p-4 w-full">
             <h1 className="px-6 pt-4 text-3xl font-bold">Feed</h1>
             {posts.length > 0 ? <Feed initalPosts={posts} 
                                       feedUserId={memberIds}/> : <p>Loading posts...</p>}

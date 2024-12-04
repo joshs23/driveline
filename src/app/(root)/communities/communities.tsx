@@ -29,15 +29,17 @@ export default async function Communities() {
 
   return (
     <div className="container w-fit py-8">
+      <h1 className="mb-2 text-3xl font-semibold">Communities</h1>
+      <p className="mb-4 opacity-70">Find your people!</p>
       <div className="flex gap-4">
         {listings.map((listing) => (
           <Link href={`/communities/${listing.id}`} passHref key={listing.name}>
-            <div className="min-w-48 rounded-lg border-2 p-4 shadow-md transition-shadow duration-300 hover:bg-secondary">
+            <div className="min-h-48 min-w-48 max-w-96 rounded-lg border-2 p-4 shadow-md transition-shadow duration-300 hover:bg-secondary">
               <h1 className="mb-2 text-xl font-semibold">{listing.name}</h1>
-              <p className="mb-4">{listing.description}</p>
               <h2 className="text-md mb-1 font-medium">
                 Members: {listing.count}
               </h2>
+              <p className="mb-4">{listing.description}</p>
             </div>
           </Link>
         ))}
