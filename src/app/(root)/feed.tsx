@@ -15,7 +15,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormMessage,
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -391,12 +390,12 @@ export default function Feed({
   initalPosts,
   disableCreatePost,
   inline,
-  feedUserId,
+  feedUserId = [],
 }: {
   initalPosts: PostWithAttributes[] | null;
   disableCreatePost?: boolean;
   inline?: boolean;
-  feedUserId?: string;
+  feedUserId?: string[];
 }) {
   const supabase = createClient();
   const [posts, setPosts] = useState<PostWithAttributes[]>(initalPosts || []);
@@ -420,8 +419,8 @@ export default function Feed({
             console.log("New post incoming!", payload.new);
 
             if (
-              !feedUserId ||
-              (feedUserId && feedUserId === payload.new.creator)
+              !feedUserId.length ||
+              (feedUserId && feedUserId.includes(payload.new.creator))
             ) {
               setPosts((prev) => [payload.new as PostWithAttributes, ...prev]);
             } else

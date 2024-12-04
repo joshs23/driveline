@@ -41,30 +41,13 @@ export default function Page({
   const [members, setMembers] = useState<Member[]>([]);
   const [memberProfiles, setMemberProfiles] = useState<Member[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
-  
+  const [memberIds, setMemberIds] = useState<string[]>([]);
+
 
   useEffect(() => {
     const fetchData = async () => {
       const { id } = await params;
       const supabase = await createClient();
-
-      const { data, error } = await supabase
-        .from("Post")
-        .select("*, PostImage(*), Comment(*)")
-        .order("id", { ascending: false });
-        const formattedData = data?.map((post) => ({
-          id: post.id,
-          body: post.body,
-          community: post.community,
-          created_at: post.created_at,
-          creator: post.creator,
-          content: post.body,
-          author: post.creator,
-          createdAt: post.created_at,
-          Comment: Array.isArray(post.Comment) ? post.Comment : [],
-          PostImage: post.PostImage,
-        })) || [];
-      setPosts(formattedData);
 
       const { data: communityData } = await supabase
         .from("Community")
@@ -105,10 +88,32 @@ export default function Page({
         .select("*")
         .in("user_id", membersData?.map((member) => member.user_id) || []);
       setMemberProfiles(profiles || []);
+      setMemberIds(membersData?.map((member) => member.user_id) || []);
     };
 
     fetchData();
   }, [params]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    async function getData() {
+      const { data, error } = await supabase
+        .from("Post")
+        .select("*, PostImage(*), Comment(*)")
+        .in("creator", memberIds)
+        .order("id", { ascending: false });
+      if (error) {
+        console.error(error);
+      }
+      const formattedData =
+        data?.map((post) => ({
+          ...post,
+          Comment: Array.isArray(post.Comment) ? post.Comment : [],
+        })) || [];
+      setPosts(formattedData);
+    }
+    getData();
+  }, [memberIds]);
 
   const handleJoin = async () => {
     const supabase = await createClient();
@@ -173,9 +178,10 @@ export default function Page({
         </div>
         <div className="flex gap-8">
           {/* Feed */}
-          <div className="col-span-6 flex w-full flex-col mt-4 gap-4 overflow-y-auto border-4">
-            <h1 className="px-6 pt-4 text-center text-3xl font-bold">Feed</h1>
-            {posts.length > 0 ? <Feed initalPosts={posts} /> : <p>Loading posts...</p>}
+          <div className="mt-4 flex items-center justify-between border-4 p-4">
+            <h1 className="px-6 pt-4 text-3xl font-bold">Feed</h1>
+            {posts.length > 0 ? <Feed initalPosts={posts} 
+                                      feedUserId={memberIds}/> : <p>Loading posts...</p>}
           </div>
           {/* Members Section */}
           <div className="mt-4 items-center justify-between border-4 p-4 w-1/4">
