@@ -23,6 +23,9 @@ const routes = [
   /* { name: "Following", href: "/following" }, */
 ];
 
+const projectId =
+  process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
+
 async function UserButton() {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
@@ -47,7 +50,11 @@ async function UserButton() {
       <DropdownMenuTrigger className="flex w-full items-center gap-2 rounded-md border px-4 py-2 shadow-lg">
         <Avatar className="border-2 shadow-md">
           <AvatarImage
-            src={profileData.profile_picture_url as string | undefined}
+            src={
+              (profileData?.profile_picture_url &&
+                `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${profileData.profile_picture_url}`) ||
+              undefined
+            }
             alt="Avatar"
           />
           <AvatarFallback>{profileData.display_name.charAt(0)}</AvatarFallback>

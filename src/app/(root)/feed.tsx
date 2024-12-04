@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Send } from 'lucide-react';
+import { Send } from "lucide-react";
 
 type PostWithAttributes = Tables<"Post"> & {
   PostImage?: Tables<"PostImage">[];
@@ -28,16 +28,19 @@ type PostWithAttributes = Tables<"Post"> & {
 };
 
 // function to create a new comment on a post
-const createComment = async (body: string,
-                             Parent_post: number,
-                             Author: string) => {
+async function createComment(
+  body: string,
+  Parent_post: number,
+  Author: string,
+) {
   const supabase = createClient();
   const { data, error } = await supabase.from("Comment").insert([
     {
       body,
       Parent_post,
       Author,
-    },]);
+    },
+  ]);
   if (error) {
     console.error("Error creating comment", error);
     return null;
@@ -48,6 +51,17 @@ const createComment = async (body: string,
 const projectId =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
 
+const formSchema = z.object({
+  body: z
+    .string()
+    .min(2, {
+      message: "Your comment must be at least 2 characters long.",
+    })
+    .max(240, {
+      message: "Your comment cannot be more than 240 characters long.",
+    }),
+});
+
 function FeedPost({
   post,
   inline,
@@ -55,8 +69,9 @@ function FeedPost({
   post: PostWithAttributes;
   inline?: boolean;
 }) {
-
-  const [profileData, setProfileData] = useState<Tables<"UserProfile"> | null>(null);
+  const [profileData, setProfileData] = useState<Tables<"UserProfile"> | null>(
+    null,
+  );
   useEffect(() => {
     const fetchProfileData = async () => {
       const supabase = createClient();
@@ -84,27 +99,16 @@ function FeedPost({
     fetchProfileData();
   }, []);
 
-  const formSchema = z.object({
-    body: z
-      .string()
-      .min(2, {
-        message: "Your comment must be at least 2 characters long.",
-      })
-      .max(240, {
-        message: "Your comment cannot be more than 240 characters long.",
-      }),
-  });
-    
   const form = useForm<z.infer<typeof formSchema>>({
-      resolver: zodResolver(formSchema),
-      defaultValues: {
-        body: "",
-      },
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      body: "",
+    },
   });
   const [isCommenting, setIsCommenting] = useState(0);
   const {
-    isError: isAuthorError,
     data: authorData,
+    isError: isAuthorError,
     error: authorError,
   } = useQuery({
     queryKey: ["author_id", post.creator],
@@ -121,9 +125,10 @@ function FeedPost({
       return data;
     },
   });
+
   const {
-    isError: isCommentError,
     data: commentAuthorData,
+    isError: isCommentError,
     error: commentError,
   } = useQuery({
     queryKey: ["comment_author", post.Comment],
@@ -163,11 +168,11 @@ function FeedPost({
   const focusOnPost = () => {
     setIsCommenting(post.id);
   };
-  
+
   const unfocusOnPost = () => {
     setIsCommenting(0);
   };
-  
+
   return (
     <div
       key={post.id}
@@ -241,9 +246,9 @@ function FeedPost({
                       <Avatar>
                         <AvatarImage
                           src={
-                            commentAuthor?.profile_picture_url as
-                              | string
-                              | undefined
+                            (commentAuthor?.profile_picture_url &&
+                              `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${commentAuthor.profile_picture_url}`) ||
+                            undefined
                           }
                           alt="Avatar"
                         />
@@ -278,49 +283,65 @@ function FeedPost({
             const Author = String(profileData?.user_id);
             const Parent_post = post.id;
             await createComment(body, Parent_post, Author);
-            form.reset()
+            form.reset();
           }}
         >
           <div className="flex flex-col">
-                <div className="flex items-center gap-2">
-                  <div className="text-sm text-neutral-400">
-                  <Avatar>
-                    <AvatarImage
-                      src={profileData?.profile_picture_url as string | undefined}
-                      alt="Avatar"
-                    />
-                    <AvatarFallback>
-                      {profileData?.display_name.toString().charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  </div>
-                  <div className="bg-neutral-700 rounded-lg"
-                       style={{padding: '.5px'}}>
-                    <div className="flex gap-2">
-                      <FormField
-                        control={form.control}
-                        name="body"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Textarea 
-                                className="bg-transparent resize-none" 
-                                onFocus={focusOnPost}
-                                placeholder="Add a comment"
-                                rows={1}
-                                style={{ outline: 'none', border: 'none', height: 'auto', minHeight: '2rem' }} 
-                                {...field}
-                                onBlur={() => unfocusOnPost()} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
-                    {(isCommenting == post.id || form.watch("body").length > 0) && <button type="submit"><Send /></button>}
+            <div className="flex items-center gap-2">
+              <div className="text-sm text-neutral-400">
+                <Avatar>
+                  <AvatarImage
+                    src={
+                      (profileData?.profile_picture_url &&
+                        `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${profileData.profile_picture_url}`) ||
+                      undefined
+                    }
+                    alt="Avatar"
+                  />
+                  <AvatarFallback>
+                    {profileData?.display_name.toString().charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              <div
+                className="rounded-lg bg-neutral-700"
+                style={{ padding: ".5px" }}
+              >
+                <div className="flex gap-2">
+                  <FormField
+                    control={form.control}
+                    name="body"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Textarea
+                            className="resize-none bg-transparent"
+                            onFocus={focusOnPost}
+                            placeholder="Add a comment"
+                            rows={1}
+                            style={{
+                              outline: "none",
+                              border: "none",
+                              height: "auto",
+                              minHeight: "2rem",
+                            }}
+                            {...field}
+                            onBlur={() => unfocusOnPost()}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
+              {(isCommenting == post.id || form.watch("body").length > 0) && (
+                <button type="submit">
+                  <Send />
+                </button>
+              )}
+            </div>
+          </div>
         </form>
       </Form>
     </div>

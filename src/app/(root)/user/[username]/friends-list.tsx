@@ -29,6 +29,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+const projectId =
+  process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
+
 async function getViewedUser({ username }: { username: string }) {
   const supabase = createClient();
 
@@ -427,9 +430,9 @@ export default function FriendsList({ username }: { username: string }) {
                         <Avatar>
                           <AvatarImage
                             src={
-                              friendRequest.profile_picture_url as
-                                | string
-                                | undefined
+                              (friendRequest?.profile_picture_url &&
+                                `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${friendRequest.profile_picture_url}`) ||
+                              undefined
                             }
                             alt="Avatar"
                           />
@@ -479,10 +482,10 @@ export default function FriendsList({ username }: { username: string }) {
                   <div className="relative flex w-fit items-center rounded-lg border bg-card p-4 shadow-lg transition-colors hover:bg-card/20">
                     <Link href={`/user/${friend.username}`} className="flex">
                       <Avatar>
-                        <AvatarImage
-                          src={friend.profile_picture_url as string | undefined}
-                          alt="Avatar"
-                        />
+                        src=
+                        {(friend?.profile_picture_url &&
+                          `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${friend.profile_picture_url}`) ||
+                          undefined}
                         <AvatarFallback>
                           {friend.display_name.charAt(0)}
                         </AvatarFallback>
