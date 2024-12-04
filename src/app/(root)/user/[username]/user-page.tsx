@@ -13,7 +13,7 @@ import { IconFriends } from "@tabler/icons-react";
 const projectId =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
 
-function sanitizeFileName(fileName: string): string {
+export function sanitizeFileName(fileName: string): string {
   const sanitized = fileName
     .replace(/[^a-zA-Z0-9!\-_.*'()]/g, "_") // Only allow permitted characters
     .replace(/\/+/g, "/") // Prevent multiple slashes from collapsing
@@ -56,6 +56,10 @@ function Banner({ userDetails }: { userDetails: Tables<"UserProfile"> }) {
   async function uploadBanner(bannerImage: File) {
     if (!bannerImage) return;
 
+    const toastId = toast.loading("Uploading new banner...", {
+      position: "top-right",
+    });
+
     const supabase = createClient();
     const { data: imageData, error } = await supabase.storage
       .from("avatars")
@@ -68,6 +72,9 @@ function Banner({ userDetails }: { userDetails: Tables<"UserProfile"> }) {
       );
 
     if (error) {
+      toast.error("Error uploading image! - " + error.message, {
+        id: toastId,
+      });
       console.error("Error uploading image:", error, imageData);
       return;
     }
@@ -80,6 +87,11 @@ function Banner({ userDetails }: { userDetails: Tables<"UserProfile"> }) {
         })
         .eq("user_id", userDetails.user_id);
     }
+
+    toast.success("Banner has been updated!", {
+      id: toastId,
+      className: "bg-green-600",
+    });
 
     queryClient.invalidateQueries({
       queryKey: ["username", userDetails.username],
