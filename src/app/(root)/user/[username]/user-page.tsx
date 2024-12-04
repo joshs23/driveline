@@ -83,6 +83,8 @@ function Banner({ userDetails }: { userDetails: Tables<"UserProfile"> }) {
       queryKey: ["username", userDetails.username],
     });
 
+    queryClient.invalidateQueries({ queryKey: ["client_user"] });
+
     redirect(pathname);
   }
 
@@ -182,6 +184,8 @@ function ProfilePicture({
     queryClient.invalidateQueries({
       queryKey: ["username", userDetails.username],
     });
+
+    queryClient.invalidateQueries({ queryKey: ["client_user"] });
 
     redirect(pathname);
   }

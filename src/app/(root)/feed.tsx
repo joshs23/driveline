@@ -92,7 +92,7 @@ function CommentSection({ post }: { post: PostWithAttributes }) {
     isError: isCurrentUserError,
     error: currentUserError,
   } = useQuery({
-    queryKey: ["user_id", post.creator],
+    queryKey: ["client_user"],
     queryFn: async () => {
       const { data: authUser } = await supabase.auth.getUser();
 
