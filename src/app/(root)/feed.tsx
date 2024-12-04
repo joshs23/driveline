@@ -44,10 +44,10 @@ function FeedPost({
       return data;
     },
   });
-  const { 
-    isError: isCommentError, 
+  const {
+    isError: isCommentError,
     data: commentAuthorData,
-    error: commentError, 
+    error: commentError,
   } = useQuery({
     queryKey: ["comment_author", post.Comment],
     queryFn: async () => {
@@ -55,12 +55,12 @@ function FeedPost({
       const { data, error } = await supabase
         .from("UserProfile")
         .select("*")
-        .in("user_id", post.Comment?.map(comment => comment.Author) || [])
+        .in("user_id", post.Comment?.map((comment) => comment.Author) || []);
 
       if (error) console.error("Error retrieving comment details", error);
 
       return data;
-    }
+    },
   });
 
   if (isAuthorError)
@@ -93,9 +93,13 @@ function FeedPost({
       <div className="flex items-center gap-2">
         {authorData ? (
           <Link href={`/user/${authorData.username}`} passHref>
-            <Avatar>
+            <Avatar className="border border-secondary">
               <AvatarImage
-                src={authorData?.profile_picture_url as string | undefined}
+                src={
+                  (authorData?.profile_picture_url &&
+                    `https://${projectId}.supabase.co/storage/v1/object/public/avatars/${authorData.profile_picture_url}`) ||
+                  undefined
+                }
                 alt="Avatar"
               />
               <AvatarFallback>
@@ -141,37 +145,42 @@ function FeedPost({
         <>
           {post.Comment.map((comment) => {
             const commentAuthor = commentAuthorData?.find(
-              (author) => author.user_id === comment.Author
+              (author) => author.user_id === comment.Author,
             );
             return (
-            <div key={comment.id} className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <div className="text-sm text-neutral-400">
-                <Link href={`/user/${commentAuthor?.username}`} passHref>
-                    <Avatar>
-                      <AvatarImage
-                        src={commentAuthor?.profile_picture_url as string | undefined}
-                        alt="Avatar"
-                      />
-                      <AvatarFallback>
-                        {commentAuthor?.display_name.toString().charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    </Link>
-                </div>
-                <div className="bg-neutral-700 p-2 rounded-lg">
-                  <div className="flex gap-2">
-                    <p>{comment.body}</p>
+              <div key={comment.id} className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <div className="text-sm text-neutral-400">
                     <Link href={`/user/${commentAuthor?.username}`} passHref>
-                      <p className="text-sm text-neutral-400">
-                      @{commentAuthor?.username}
-                      </p>
+                      <Avatar>
+                        <AvatarImage
+                          src={
+                            commentAuthor?.profile_picture_url as
+                              | string
+                              | undefined
+                          }
+                          alt="Avatar"
+                        />
+                        <AvatarFallback>
+                          {commentAuthor?.display_name.toString().charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
                     </Link>
+                  </div>
+                  <div className="rounded-lg bg-neutral-700 p-2">
+                    <div className="flex gap-2">
+                      <p>{comment.body}</p>
+                      <Link href={`/user/${commentAuthor?.username}`} passHref>
+                        <p className="text-sm text-neutral-400">
+                          @{commentAuthor?.username}
+                        </p>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )})}
+            );
+          })}
         </>
       )}
     </div>
@@ -214,7 +223,7 @@ export default function Feed({
               !feedUserId ||
               (feedUserId && feedUserId === payload.new.creator)
             ) {
-            setPosts((prev) => [payload.new as PostWithAttributes, ...prev]);
+              setPosts((prev) => [payload.new as PostWithAttributes, ...prev]);
             } else
               console.log("New post was uploaded, but not by the feed user");
           }
@@ -265,7 +274,7 @@ export default function Feed({
       )
       .subscribe();
 
-      const postCommentChannel = supabase
+    const postCommentChannel = supabase
       .channel("public:comment")
       .on(
         "postgres_changes",
