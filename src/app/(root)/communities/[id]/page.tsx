@@ -184,7 +184,8 @@ export default function Page({
           <div className="mt-4 flex items-center justify-between border-4 p-4">
             <h1 className="px-6 pt-4 text-3xl font-bold">Feed</h1>
             {posts.length > 0 ? <Feed initalPosts={posts} 
-                                      feedUserId={memberIds}/> : <p>Loading posts...</p>}
+                                      feedUserId={memberIds}/> : 
+                                      <p className="text-center">There are no posts yet. Create one!</p>}
           </div>
           {/* Members Section */}
           <div className="mt-4 items-center justify-between border-4 p-4 w-1/4">
