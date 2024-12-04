@@ -54,11 +54,11 @@ export default async function Page({
         <div className="relative">
           <UserPage username={username} />
         </div>
-        <div className="grid h-0 w-full grow grid-cols-10 py-4">
-          <div className="col-span-2 flex h-full w-full flex-col gap-4 overflow-y-auto border-r">
+        <div className="grid h-0 w-full grow grid-cols-11 py-4">
+          <div className="col-span-3 flex w-full flex-col gap-4 overflow-y-auto border-r h-screen">
             <Vehicles username={username} />
           </div>
-          <div className="col-span-6 flex w-full flex-col gap-4 overflow-y-auto border-r">
+          <div className="col-span-5 flex w-full flex-col gap-4 overflow-y-auto border-r">
             <h1 className="px-6 pt-4 text-center text-3xl font-bold">Feed</h1>
             <Feed
               initalPosts={formattedData}
@@ -67,7 +67,7 @@ export default async function Page({
               inline
             />
           </div>
-          <div className="col-span-2 flex h-full w-full flex-col gap-4 overflow-y-auto border-r">
+          <div className="col-span-3 flex h-screen w-full flex-col gap-4 overflow-y-auto border-r">
             <FriendsList username={username} />
           </div>
         </div>
