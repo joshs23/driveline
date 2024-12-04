@@ -93,28 +93,28 @@ export type Database = {
       };
       Comment: {
         Row: {
-          id: string;
+          id: number;
           created_at: string;
           edited: boolean;
           body: string;
           Parent_post: number;
-          Author: number;
+          Author: string;
         };
         Insert: {
-          id?: string;
+          id?: number;
           created_at?: string;
           edited?: boolean;
           body: string;
           Parent_post: number;
-          Author: number;
+          Author: string;
         };
         Update: {
-          id?: string;
+          id?: number;
           created_at?: string;
           edited?: boolean;
           body?: string;
           Parent_post?: number;
-          Author?: number;
+          Author?: string;
         };
         Relationships: [
           {
