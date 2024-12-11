@@ -374,7 +374,7 @@ export default function UserPage({ username }: { username: string }) {
   };
 
   return (
-    <div className="w-full">
+    <div className="max-h-full w-full overflow-clip">
       {/* Header Section */}
       <div className="relative h-[19rem] w-full border-b border-zinc-600">
         <Banner userDetails={userDetails} />
