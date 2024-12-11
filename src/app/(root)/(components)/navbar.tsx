@@ -65,8 +65,8 @@ export default async function Navbar() {
   const userButtonElement = await UserButton();
 
   return (
-    <nav className="flex flex-col items-center justify-between gap-4 border-r-2 p-4 shadow-xl">
-      <div className="flex min-w-64 flex-col items-center gap-4">
+    <nav className="h-screen fixed top-0 left-0 w-64 flex flex-col items-center justify-between gap-4 border-r-2 p-4 shadow-xl">
+      <div className="flex flex-col items-center gap-4">
         <div className="w-56 p-2">
           <Image
             src="/driveline.png"

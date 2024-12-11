@@ -16,10 +16,12 @@ export default async function Layout({
   }
 
   return (
-    <>
+    <div className="flex min-h-screen">
       <Navbar />
-      {children}
+      <div className="flex-grow ml-64">
+        {children}
+      </div>
       <RelationshipBar />
-    </>
+    </div>
   );
 }
