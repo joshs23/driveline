@@ -206,14 +206,16 @@ export default function CreatePost({
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogTrigger
-        className={cn(
-          !inFlow && "absolute bottom-4 right-4",
-          "flex cursor-pointer items-center rounded-lg border-b-[1px] border-b-white bg-primary/80 px-4 py-2 text-2xl font-bold text-primary-foreground shadow-md transition-all hover:-translate-y-[2px] hover:border-b-[3px] hover:bg-primary/90",
-        )}
-      >
-        <Plus className="mr-2 size-8 cursor-pointer" />
-        <p className="mr-2">New Post</p>
+      <DialogTrigger asChild>
+        <Button
+          className={cn(
+            !inFlow && "absolute bottom-4 right-4",
+            "flex items-center rounded-lg border-b-[1px] border-b-red-400 px-4 py-6 text-2xl font-bold shadow-md transition-all hover:-translate-y-[2px] hover:border-b-[3px] hover:bg-primary/20",
+          )}
+        >
+          <Plus className="mr-2 size-8 cursor-pointer" />
+          <p className="mr-2">New Post</p>
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
@@ -257,7 +259,7 @@ export default function CreatePost({
 
             <Button
               type="submit"
-              className="h-20 w-full rounded-md border-b-[4px] border-b-white text-xl transition-all hover:-translate-y-[2px] hover:border-b-[6px] [&_svg]:size-10"
+              className="h-20 w-full rounded-md border-b-[4px] border-red-400 text-xl transition-all hover:-translate-y-[2px] hover:border-b-[6px] hover:bg-primary/20 [&_svg]:size-10"
             >
               {(loading && <IconLoader2 className="animate-spin" />) ||
                 "Create Post"}
