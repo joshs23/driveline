@@ -6,15 +6,17 @@ export default async function Home() {
   const { data, error } = await supabase
     .from("Post")
     .select("*, PostImage(*), Comment(*)")
+    .is("community", null)
     .order("id", { ascending: false });
   if (error) {
     console.error(error);
   }
 
-  const formattedData = data?.map(post => ({
-    ...post,
-    Comment: Array.isArray(post.Comment) ? post.Comment : []
-  })) || null;
+  const formattedData =
+    data?.map((post) => ({
+      ...post,
+      Comment: Array.isArray(post.Comment) ? post.Comment : [],
+    })) || null;
 
   return <Feed initalPosts={formattedData} />;
 }
