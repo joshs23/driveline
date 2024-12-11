@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { sanitizeFileName } from "../user/[username]/user-page";
 
-async function insertPost(content: string) {
+async function insertPost(content: string, communityId?: number) {
   const supabase = createClient();
 
   const { data: user, error: userError } = await supabase.auth.getUser();
@@ -38,7 +38,13 @@ async function insertPost(content: string) {
 
   const { data: postData, error: postError } = await supabase
     .from("Post")
-    .insert([{ creator: String(user?.user?.id), body: content }])
+    .insert([
+      {
+        creator: String(user?.user?.id),
+        body: content,
+        community: communityId,
+      },
+    ])
     .select()
     .single();
 
@@ -107,7 +113,13 @@ function VehicleTagging() {
   );
 }
 
-export default function CreatePost({ inFlow }: { inFlow?: boolean }) {
+export default function CreatePost({
+  inFlow,
+  communityId,
+}: {
+  inFlow?: boolean;
+  communityId?: number;
+}) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(-1);
@@ -116,6 +128,7 @@ export default function CreatePost({ inFlow }: { inFlow?: boolean }) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       content: "",
+      images: [],
     },
   });
 
@@ -125,7 +138,7 @@ export default function CreatePost({ inFlow }: { inFlow?: boolean }) {
     setLoading(true);
     setProgress(0);
 
-    const post = await insertPost(values.content);
+    const post = await insertPost(values.content, communityId);
 
     if (!post) return;
 
