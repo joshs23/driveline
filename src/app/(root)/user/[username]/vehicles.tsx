@@ -192,7 +192,7 @@ export default function Vehicles({ username }: { username: string }) {
                       setShowConfirmDelete(true);
                       setVehicleToDelete(vehicle.id);
                     }}
-                    className="my-auto size-6 cursor-pointer rounded-full bg-primary p-1 shadow-md transition-colors hover:bg-primary/60"
+                    className="my-auto text-red-400 size-6 cursor-pointer rounded-full bg-primary/20 p-1 shadow-md transition-colors hover:bg-primary/10"
                   />
                 </DialogTrigger>
               )}

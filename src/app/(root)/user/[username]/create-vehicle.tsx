@@ -92,7 +92,7 @@ export default function CreateVehicle() {
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       {/* Button to open the dialog */}
       <DialogTrigger asChild>
-        <Plus className="size-9 cursor-pointer rounded-full bg-primary p-2 text-primary-foreground shadow-md transition-colors hover:bg-primary/60" />
+        <Plus className="size-9 text-red-400 cursor-pointer rounded-full bg-primary/20 p-2 text-primary-foreground shadow-md transition-colors hover:bg-primary/10" />
       </DialogTrigger>
       {/* Dialog Content */}
       <DialogContent className="w-1/3">

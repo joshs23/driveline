@@ -404,7 +404,7 @@ export default function FriendsList({ username }: { username: string }) {
               <div className="px-4 py-4">
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                   <DialogTrigger asChild>
-                    <Plus className="size-9 cursor-pointer rounded-full bg-primary p-2 text-primary-foreground shadow-md transition-colors hover:bg-primary/60" />
+                    <Plus className="size-9 text-red-400 cursor-pointer rounded-full bg-primary/20 p-2 text-primary-foreground shadow-md transition-colors hover:bg-primary/10" />
                   </DialogTrigger>
                   { /* Add Friend Form */}
                   <DialogContent className="mx-auto w-full max-w-80">
@@ -556,7 +556,8 @@ export default function FriendsList({ username }: { username: string }) {
                               setShowConfirmDelete(true);
                               setFriendToRemove(friend.user_id);
                             }}
-                            className="my-auto size-6 cursor-pointer rounded-full bg-primary p-1 shadow-md transition-colors hover:bg-primary/60"
+                            
+                            className="my-auto text-red-400 size-6 cursor-pointer rounded-full bg-primary/20 p-1 shadow-md transition-colors hover:bg-primary/10"
                           />
                         </DialogTrigger>
                       )}
