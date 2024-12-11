@@ -33,6 +33,7 @@ import { toast } from "sonner";
 const projectId =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
 
+// Get the user details by username
 async function getViewedUser({ username }: { username: string }) {
   const supabase = createClient();
 
@@ -49,6 +50,7 @@ async function getViewedUser({ username }: { username: string }) {
   return data;
 }
 
+// Get the authenticated user
 async function getAuthenticatedUser() {
   const supabase = createClient();
   const { data: authUser, error: authError } = await supabase.auth.getUser();
@@ -59,9 +61,11 @@ async function getAuthenticatedUser() {
   return authUser?.user;
 }
 
+// Get friends by user ID
 async function getFriends({ userId }: { userId: string }) {
   const supabase = createClient();
 
+  // We don't know which user is user_id1 or user_id2, so we need to query both directions
   const { data, error } = await supabase
     .from("Friends")
     .select("user_id1, user_id2")
@@ -76,6 +80,8 @@ async function getFriends({ userId }: { userId: string }) {
   // Map the result to extract the friend IDs
   const friends: string[] = [];
   for (const row of data) {
+    // We don't want to display the user in their own friends list
+    // so we need to check which user ID is the friend before we add it to the array
     if (row.user_id1 === userId && row.user_id2) {
       friends.push(row.user_id2);
     } else if (row.user_id2 === userId && row.user_id1) {
@@ -86,6 +92,8 @@ async function getFriends({ userId }: { userId: string }) {
   return friends;
 }
 
+// Get friend reqests to the user by the user ID
+// since we're accepting the requests, we're user_id2
 async function getFriendRequests({ userId }: { userId: string }) {
   const supabase = createClient();
 
@@ -110,6 +118,7 @@ async function getFriendRequests({ userId }: { userId: string }) {
   return friends;
 }
 
+// Get user details by user ID
 async function getUserDetails(userIds: string[]) {
   const supabase = createClient();
 
@@ -126,6 +135,7 @@ async function getUserDetails(userIds: string[]) {
   return data;
 }
 
+// Accept a friend request by user ID
 async function handleAcceptRequest(friendId: string) {
   const supabase = createClient();
   const authUser = await getAuthenticatedUser();
@@ -133,6 +143,9 @@ async function handleAcceptRequest(friendId: string) {
     console.error("No authenticated user found");
     return;
   }
+
+  // Update the friendship to accepted status
+  // We know that we're user_id2 because we're accepting the request
   const data = await supabase
     .from("Friends")
     .update({ accepted: true })
@@ -142,6 +155,7 @@ async function handleAcceptRequest(friendId: string) {
   window.location.reload();
 }
 
+// Delete a friend by user ID
 async function handleDeleteFriend(friendId: string) {
   const supabase = createClient();
   const authUser = await getAuthenticatedUser();
@@ -150,6 +164,7 @@ async function handleDeleteFriend(friendId: string) {
     return;
   }
 
+  // Delete the friendship in both directions to skip checking who is user_id1 and user_id2
   await supabase
     .from("Friends")
     .delete()
@@ -165,11 +180,15 @@ async function handleDeleteFriend(friendId: string) {
   window.location.reload();
 }
 
+// Form schema for adding a friend by username
 const formSchema = z.object({
   username: z.string().min(1, "Username is required"),
 });
 
+// friends-list component for displaying, adding, removing, and managing requests for friends
 export default function FriendsList({ username }: { username: string }) {
+
+  // function to add a friend by username using the prompt
   async function addFriend(friend: z.infer<typeof formSchema>) {
     const supabase = createClient();
     const authUser = await getAuthenticatedUser();
@@ -179,7 +198,7 @@ export default function FriendsList({ username }: { username: string }) {
       return;
     }
 
-    // Find the user ID for the target friend (username)
+    // Find the user ID for the target friend by username
     const { data, error } = await supabase
       .from("UserProfile")
       .select("user_id")
@@ -187,12 +206,12 @@ export default function FriendsList({ username }: { username: string }) {
       .single();
 
     if (data?.user_id === authUser.id) {
-      toast("You can't add yourself as a friend."); // Display toast immediately
+      toast("You can't add yourself as a friend."); // Notification if user tries to add themselves
       return;
     }
 
     if (error || !data) {
-      toast("User not found."); // Display toast immediately
+      toast("User not found."); // Notification if user isn't in database
       return;
     }
 
@@ -216,10 +235,12 @@ export default function FriendsList({ username }: { username: string }) {
     }
 
     if (existingFriendship) {
-      toast("Friend request already exists or is accepted."); // Display toast immediately
+      toast("Friend request already exists or is accepted."); // Notification if friendship already exists
       return;
     }
 
+    // Insert the new friendship with a pending status using our ID, and the target user's ID
+    // The "sender" of a friend request is always user_id1
     const { error: insertError } = await supabase.from("Friends").insert([
       {
         user_id1: myUserId,
@@ -230,12 +251,13 @@ export default function FriendsList({ username }: { username: string }) {
 
     if (insertError) {
       console.log("Error sending friend request:", insertError);
-      toast("Failed to send friend request."); // Display toast immediately
+      toast("Failed to send friend request."); // Notification for any other errors
     } else {
-      toast("Friend request sent to: " + friend.username); // Display toast immediately
+      toast("Friend request sent to: " + friend.username); // Notification for successful request
     }
   }
 
+  // accepted friends
   const [friends, setFriends] = useState<
     | {
         user_id: string;
@@ -245,6 +267,8 @@ export default function FriendsList({ username }: { username: string }) {
       }[]
     | null
   >(null);
+
+  // pending friend requests
   const [friendRequests, setFriendRequests] = useState<
     | {
         user_id: string;
@@ -254,6 +278,8 @@ export default function FriendsList({ username }: { username: string }) {
       }[]
     | null
   >(null);
+
+  // viewed user details
   const [viewedUser, setViewedUser] = useState<{
     user_id: string;
     display_name: string;
@@ -267,6 +293,7 @@ export default function FriendsList({ username }: { username: string }) {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [friendToRemove, setFriendToRemove] = useState<string | null>(null);
 
+  // Form for adding a friend by username
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -274,6 +301,7 @@ export default function FriendsList({ username }: { username: string }) {
     },
   });
 
+  // Handle form submission for adding a friend by username
   function onSubmit(values: z.infer<typeof formSchema>) {
     addFriend(values);
     form.reset();
@@ -282,6 +310,8 @@ export default function FriendsList({ username }: { username: string }) {
 
   useEffect(() => {
     async function fetchData() {
+
+      // Fetch the authenticated user
       const authUser = await getAuthenticatedUser();
       try {
         if (!authUser) {
@@ -290,6 +320,7 @@ export default function FriendsList({ username }: { username: string }) {
           return;
         }
 
+        // Fetch the viewed user's details
         const viewedUser = await getViewedUser({ username });
         setViewedUser(viewedUser);
         if (!viewedUser) {
@@ -298,6 +329,7 @@ export default function FriendsList({ username }: { username: string }) {
           return;
         }
 
+        // Check if the authenticated user is the owner of the viewed profile
         setAmOwner(authUser.id === viewedUser.user_id);
 
         // Fetch friends for the viewed user
@@ -308,6 +340,7 @@ export default function FriendsList({ username }: { username: string }) {
         } else {
           setFriends([]);
         }
+
         // Get friend requests for the viewed user
         const friendRequestIds = await getFriendRequests({
           userId: viewedUser.user_id,
@@ -318,6 +351,7 @@ export default function FriendsList({ username }: { username: string }) {
         } else {
           setFriendRequests([]);
         }
+
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -335,6 +369,7 @@ export default function FriendsList({ username }: { username: string }) {
       </div>
     );
 
+  // Confirm friend removal and delete the friend
   function handleDelete() {
     if (friendToRemove) {
       handleDeleteFriend(friendToRemove);
@@ -343,6 +378,7 @@ export default function FriendsList({ username }: { username: string }) {
     }
   }
 
+  // Close the confirmation prompt for friend removal
   function cancelDelete() {
     setShowConfirmDelete(false);
     setFriendToRemove(null);
@@ -359,15 +395,18 @@ export default function FriendsList({ username }: { username: string }) {
           }
         }}
       >
+        { /* Friends Section Header */}
         <div className="px-4">
           <div className="flex">
             <h2 className="py-4 text-3xl font-bold">Friends</h2>
+            { /* If we're the owner, show the add friend button */}
             {amOwner && (
               <div className="px-4 py-4">
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                   <DialogTrigger asChild>
                     <Plus className="size-9 cursor-pointer rounded-full bg-primary p-2 text-primary-foreground shadow-md transition-colors hover:bg-primary/60" />
                   </DialogTrigger>
+                  { /* Add Friend Form */}
                   <DialogContent className="mx-auto w-full max-w-80">
                     <DialogHeader>
                       <DialogTitle className="scroll-m-20 text-xl font-extrabold tracking-tight lg:text-2xl">
@@ -413,6 +452,7 @@ export default function FriendsList({ username }: { username: string }) {
               </div>
             )}
           </div>
+          {/* List pending friend requests if you're the owner of the viewed account */}
           {amOwner && friendRequests && friendRequests.length > 0 ? (
             <>
               <p className="text-lg font-bold">Friend Requests Pending...</p>
@@ -421,10 +461,12 @@ export default function FriendsList({ username }: { username: string }) {
                   <li key={friendRequest.user_id} className="">
                     <div className="items-center space-x-4">
                       <div className="relative w-fit items-center rounded-lg border bg-card p-4 shadow-lg transition-colors hover:bg-card/20">
+                      { /* Link to the friend's profile */}
                         <Link
                           href={`/user/${friendRequest.username}`}
                           className="flex items-center"
                         >
+                          {/* Avatar */}
                           <Avatar>
                             <AvatarImage
                               src={
@@ -439,13 +481,15 @@ export default function FriendsList({ username }: { username: string }) {
                             </AvatarFallback>
                           </Avatar>
                           <div className="px-2">
-                            <p className="font-semibold">
-                              {friendRequest.display_name}
-                            </p>
+                            {/* Display Name */}
+                            <p className="font-semibold">{friendRequest.display_name}</p>
+                            { /* Username */}
                             <p className="text-sm">@{friendRequest.username}</p>
                           </div>
                         </Link>
                         <div className="space-x-2 space-y-2">
+                          {/* Accept and Decline Buttons */}
+                          { /* Accept */}
                           <Button
                             onClick={() => {
                               handleAcceptRequest(friendRequest.user_id);
@@ -454,6 +498,7 @@ export default function FriendsList({ username }: { username: string }) {
                           >
                             Accept
                           </Button>
+                          { /* Decline */}
                           <Button
                             onClick={() => {
                               handleDeleteFriend(friendRequest.user_id);
@@ -472,13 +517,16 @@ export default function FriendsList({ username }: { username: string }) {
           ) : (
             <p></p>
           )}
+          {/* Friends list */}
           {friends && friends.length > 0 ? (
             <ul className="">
               {friends.map((friend) => (
                 <li key={friend.user_id} className="">
                   <div className="flex items-center space-x-4">
                     <div className="relative flex w-fit items-center rounded-lg border bg-card p-4 shadow-lg transition-colors hover:bg-card/20">
+                    { /* Link to the friend's profile */}
                       <Link href={`/user/${friend.username}`} className="flex">
+                      {/* Avatar */}
                         <Avatar>
                           <AvatarImage
                             src={
@@ -488,18 +536,21 @@ export default function FriendsList({ username }: { username: string }) {
                             }
                             alt="Avatar"
                           />
-
                           <AvatarFallback>
                             {friend.display_name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="px-2">
+                          {/* Display Name */}
                           <p className="font-semibold">{friend.display_name}</p>
+                          {/* Username */}
                           <p className="text-sm">@{friend.username}</p>
                         </div>
                       </Link>
+                      {/* If we're the profile owner, show the remove friend button*/}
                       {amOwner && (
                         <DialogTrigger asChild>
+                          {/* Open the confirmation prompt on click */}
                           <X
                             onClick={() => {
                               setShowConfirmDelete(true);
@@ -530,6 +581,7 @@ export default function FriendsList({ username }: { username: string }) {
           </DialogHeader>
           <div className="flex justify-end gap-4">
             <DialogClose asChild>
+              {/* Cancel Removal */}
               <Button
                 onClick={cancelDelete}
                 className="rounded-md px-4 py-2 transition-colors hover:bg-primary/60"
@@ -537,6 +589,7 @@ export default function FriendsList({ username }: { username: string }) {
                 Cancel
               </Button>
             </DialogClose>
+            {/* Confirm Removal */}
             <Button
               onClick={handleDelete}
               className="rounded-md px-4 py-2 transition-colors hover:bg-primary/60"

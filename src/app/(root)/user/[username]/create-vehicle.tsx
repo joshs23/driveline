@@ -33,6 +33,7 @@ async function getUser() {
   return data;
 }
 
+// using the values from the form we insert a new vehicle into the vehicle table
 async function insertVehicle(vehicle: z.infer<typeof formSchema>) {
   const supabase = createClient();
   const user = await getUser();
@@ -54,6 +55,7 @@ async function insertVehicle(vehicle: z.infer<typeof formSchema>) {
   return data;
 }
 
+// schema for the new vehicle form
 const formSchema = z.object({
   make: z.string(),
   model: z.string(),
@@ -77,6 +79,8 @@ export default function CreateVehicle() {
     },
   });
 
+  // Handles the form submission by passing the form values to the InsertVehicle function
+  // and resetting the form.
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
     insertVehicle(values);
@@ -86,9 +90,11 @@ export default function CreateVehicle() {
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {/* Button to open the dialog */}
       <DialogTrigger asChild>
         <Plus className="size-9 cursor-pointer rounded-full bg-primary p-2 text-primary-foreground shadow-md transition-colors hover:bg-primary/60" />
       </DialogTrigger>
+      {/* Dialog Content */}
       <DialogContent className="w-1/3">
         <DialogHeader>
           <DialogTitle className="scroll-m-20 text-xl font-extrabold tracking-tight lg:text-2xl">

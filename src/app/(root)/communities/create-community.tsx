@@ -24,7 +24,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Textarea } from "@/components/ui/textarea";
 
-async function insertVehicle(community: z.infer<typeof formSchema>) {
+// Using the values from the form we insert a new row into the community table
+async function insertCommunity(community: z.infer<typeof formSchema>) {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("Community")
@@ -36,16 +37,18 @@ async function insertVehicle(community: z.infer<typeof formSchema>) {
     ])
     .select();
 
-  if (error) console.error("Error inserting Vehicle:", error);
+  if (error) console.error("Error inserting Community:", error);
 
   return data;
 }
 
+// Form schema for creating a community
 const formSchema = z.object({
   name: z.string(),
   description: z.string(),
 });
 
+// CreateCommunity component
 export default function CreateCommunity() {
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -57,20 +60,24 @@ export default function CreateCommunity() {
     },
   });
 
+  // Handles the form submission by passing the form values to the insertCommunity function
+  // and resetting the form.
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    insertVehicle(values);
+    insertCommunity(values);
     form.reset();
-    window.location.reload(); // Just refreshing for now instead of subscribing to changes.
+    window.location.reload(); // Just refreshing to show changes.
   }
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {/* Button to open the dialog */}
       <DialogTrigger asChild>
         <Button className="size-9 rounded-full p-2 shadow-md transition-colors">
           <Plus />
         </Button>
       </DialogTrigger>
+
+      {/* Dialog Content */}
       <DialogContent className="w-1/3">
         <DialogHeader>
           <DialogTitle className="scroll-m-20 text-2xl font-bold tracking-tight lg:text-3xl">

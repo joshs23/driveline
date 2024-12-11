@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 
+// Return the username of the profile we are viewing
 async function getViewedUser({ username }: { username: string }) {
   const supabase = createClient();
 
@@ -30,6 +31,7 @@ async function getViewedUser({ username }: { username: string }) {
   return data;
 }
 
+// Get the currently authenticated user
 async function getAuthenticatedUser() {
   const supabase = createClient();
   const { data: authUser, error: authError } = await supabase.auth.getUser();
@@ -39,6 +41,7 @@ async function getAuthenticatedUser() {
   return authUser;
 }
 
+// Retreive all the vehicles for the viewed user
 async function getVehicles({ username }: { username: string }) {
   const supabase = createClient();
   const user = await getViewedUser({ username });
@@ -57,7 +60,7 @@ async function getVehicles({ username }: { username: string }) {
   return data;
 }
 
-// Function to delete a vehicle
+// Delete a user's specific vehicle by vehicleID from the database
 async function deleteVehicle(vehicleId: string) {
   const supabase = createClient();
   const { data, error } = await supabase
@@ -73,6 +76,7 @@ async function deleteVehicle(vehicleId: string) {
   return true;
 }
 
+// vehicles component for displaying, adding, and deleting vehicles on the user page
 export default function Vehicles({ username }: { username: string }) {
   const queryClient = useQueryClient();
   const [vehicles, setVehicles] = useState<
@@ -85,20 +89,23 @@ export default function Vehicles({ username }: { username: string }) {
       }[]
     | null
   >(null);
-  const [myVehicles, setMyVehicles] = useState(false);
+  const [myVehicles, setMyVehicles] = useState(false); // If we're viewing our own vehicles or not
   const [loading, setLoading] = useState(true);
 
-  // State for managing the confirmation modal
+  // States for managing the confirmation modal
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [vehicleToDelete, setVehicleToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
+
+      // Fetch the vehicles for the user
       const data = await getVehicles({ username });
       setVehicles(
         data?.map((vehicle) => ({ ...vehicle, id: vehicle.id.toString() })) ||
           [],
       );
+      // Check if the user is viewing their own profile
       const authUser = await getAuthenticatedUser();
       const viewedUser = await getViewedUser({ username });
       setMyVehicles(authUser?.user?.id === viewedUser?.[0]?.user_id);
@@ -108,6 +115,7 @@ export default function Vehicles({ username }: { username: string }) {
     fetchData();
   }, [username]);
 
+  // handler to call deleteVehicle and update the UI
   const handleDelete = async () => {
     if (vehicleToDelete) {
       const success = await deleteVehicle(vehicleToDelete);
@@ -122,6 +130,7 @@ export default function Vehicles({ username }: { username: string }) {
     }
   };
 
+  // 
   const cancelDelete = () => {
     setShowConfirmDelete(false);
     setVehicleToDelete(null);
@@ -144,11 +153,16 @@ export default function Vehicles({ username }: { username: string }) {
         }
       }}
     >
+      {/* Vehicles Section Header */}
       <div className="px-4 py-4">
         <div className="mb-4 flex items-center gap-x-4">
           <h1 className="text-3xl font-bold">Vehicles</h1>
+
+          { /* Add Vehicle Button */}
           {myVehicles && <CreateVehicle />}
         </div>
+          
+          {/* Vehicles List */}
         <ul className="flex flex-wrap gap-2">
           {vehicles?.map((vehicle) => (
             <li
@@ -158,11 +172,13 @@ export default function Vehicles({ username }: { username: string }) {
               <div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
+                  { /* Display Year Make Model */}
                     <p className="mr-4 text-lg font-semibold">
                       {vehicle.year} {vehicle.make} {vehicle.model}
                     </p>
                   </div>
                 </div>
+                { /* Conditionally Display Color */}
                 {vehicle.color && (
                   <p className="text-sm">Color: {vehicle.color}</p>
                 )}
@@ -184,7 +200,7 @@ export default function Vehicles({ username }: { username: string }) {
           ))}
         </ul>
 
-        {/* Confirmation Modal */}
+        {/* Confirmation Modal for Deletion*/}
         <DialogContent className="w-full max-w-sm rounded-lg p-6 shadow-lg">
           <DialogHeader>
             <DialogTitle className="mb-4 text-xl font-semibold">
@@ -196,6 +212,7 @@ export default function Vehicles({ username }: { username: string }) {
           </DialogHeader>
           <div className="flex justify-end gap-4">
             <DialogClose asChild>
+              {/* Cancel Deletion */}
               <Button
                 onClick={cancelDelete}
                 className="rounded-md px-4 py-2 transition-colors hover:bg-primary/60"
@@ -203,6 +220,7 @@ export default function Vehicles({ username }: { username: string }) {
                 Cancel
               </Button>
             </DialogClose>
+            {/* Confirm Deletion */}
             <Button
               onClick={handleDelete}
               className="rounded-md px-4 py-2 transition-colors hover:bg-primary/60"
