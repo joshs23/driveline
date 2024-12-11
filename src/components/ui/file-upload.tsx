@@ -1,3 +1,4 @@
+"use effect";
 import { cn } from "@/lib/utils";
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
@@ -17,7 +18,7 @@ export const FileUpload = ({
     if (onChange) {
       onChange(files);
     }
-  }, [files, onChange]);
+  }, [files]);
 
   const handleFileChange = (newFiles: File[]) => {
     for (const file of newFiles) {
