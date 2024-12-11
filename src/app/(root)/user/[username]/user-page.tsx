@@ -255,6 +255,7 @@ export default function UserPage({ username }: { username: string }) {
     color: "",
     message: "",
   });
+
   useEffect(() => {
     getCurrentUser().then((data) => setCurrentUserId(data?.user?.id));
   }, []);
@@ -326,13 +327,13 @@ export default function UserPage({ username }: { username: string }) {
     } else if (friendRequestStatus === "pending") {
       setShowFriendButton({
         show: true,
-        color: "bg-yellow-500 hover:bg-yellow-600",
+        color: "bg-yellow-500/20 text-yellow-300 hover:bg-yellow-600/10",
         message: "Pending",
       });
     } else if (friendRequestStatus === "none") {
       setShowFriendButton({
         show: true,
-        color: "bg-red-500 hover:bg-red-600",
+        color: "bg-red-500/20 text-red-300 hover:bg-red-600/10",
         message: "Add Friend",
       });
     }
@@ -386,7 +387,6 @@ export default function UserPage({ username }: { username: string }) {
         {showFriendButton.show ? (
           <div className="pt-2">
             <Button
-              variant="fr"
               className={`text-lg font-semibold ${showFriendButton.color}`}
               onClick={
                 friendRequestStatus == "none"
