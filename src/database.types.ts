@@ -274,7 +274,27 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      CommunityMemberWithProfile: {
+        Row: {
+          banner_url: string | null;
+          community_id: number | null;
+          created_at: string | null;
+          display_name: string | null;
+          id: number | null;
+          profile_picture_url: string | null;
+          user_id: string | null;
+          username: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "CommunityMember_community_id_fkey";
+            columns: ["community_id"];
+            isOneToOne: false;
+            referencedRelation: "Community";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Functions: {
       [_ in never]: never;
