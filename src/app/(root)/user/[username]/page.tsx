@@ -55,7 +55,7 @@ export default async function Page({
           <UserPage username={username} />
         </div>
         <div className="grid h-0 w-full grow grid-cols-11 py-4">
-          <div className="col-span-3 flex w-full flex-col gap-4 overflow-y-auto border-r h-screen">
+          <div className="col-span-3 flex w-full flex-col gap-4 overflow-y-auto border-r">
             <Vehicles username={username} />
           </div>
           <div className="col-span-5 flex w-full flex-col gap-4 overflow-y-auto border-r">
@@ -67,7 +67,9 @@ export default async function Page({
               inline
             />
           </div>
-          <div className="col-span-3 flex h-screen w-full flex-col gap-4 overflow-y-auto border-r">
+          <div className="col-span-3 flex w-full flex-col gap-4 overflow-y-auto border-r">
+            <FriendsList username={username} />
+            <FriendsList username={username} />
             <FriendsList username={username} />
           </div>
         </div>
