@@ -72,54 +72,20 @@ export default function Page({
       const user = await supabase.auth.getUser();
       const userId = user.data.user?.id;
 
-      const { data: userMembership } = await supabase
-        .from("CommunityMember")
-        .select("*")
-        .eq("community_id", id)
-        .eq("user_id", userId ?? "")
-        .single();
-
-      setCommunity(communityData);
-      setMembers(membersData || []);
-      setAmMember(!!userMembership);
-
-      const { data: profiles } = await supabase
-        .from("UserProfile")
-        .select("*")
-        .in("user_id", membersData?.map((member) => member.user_id) || []);
-      setMemberProfiles(profiles || []);
-      setMemberIds(membersData?.map((member) => member.user_id) || []);
-    };
-
-    fetchData();
-  }, [params]);
-
-  useEffect(() => {
-    const supabase = createClient();
-    async function getData() {
-      const { data, error } = await supabase
+  const { data: rawPosts } = await supabase
         .from("Post")
         .select("*, PostImage(*), Comment(*)")
-        .in("creator", memberIds)
+    .eq("community", id)
         .order("id", { ascending: false });
-      if (error) {
-        console.error(error);
-      }
-      const formattedData =
-        data?.map((post) => ({
+
+  const posts =
+    rawPosts?.map((post) => ({
           ...post,
           Comment: Array.isArray(post.Comment) ? post.Comment : [],
           content: post.body,
           author: post.creator,
           createdAt: post.created_at,
         })) || [];
-      setPosts(formattedData);
-    }
-    getData();
-  }, [memberIds]);
-
-  const projectId =
-  process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
 
   const handleJoin = async () => {
     const supabase = await createClient();
@@ -184,12 +150,7 @@ export default function Page({
         </div>
         <div className="flex gap-8">
           {/* Feed */}
-          <div className="mt-4 items-center justify-between border-4 p-4 w-full">
-            <h1 className="px-6 pt-4 text-3xl font-bold">Feed</h1>
-            {posts.length > 0 ? <Feed initalPosts={posts} 
-                                      feedUserId={memberIds}
-                                      disableCreatePost/> : 
-                                      <p className="text-center">There are no posts yet. Create one!</p>}
+          <Feed initalPosts={posts} communityId={id} inline />
           </div>
           {/* Members Section */}
           <div className="mt-4 items-center justify-between border-4 p-4 w-1/4">

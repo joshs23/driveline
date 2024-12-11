@@ -10,12 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Send } from "lucide-react";
@@ -387,17 +382,20 @@ export default function Feed({
   initalPosts,
   disableCreatePost,
   inline,
-  feedUserId = [],
+  feedUserId,
+  communityId,
 }: {
   initalPosts: PostWithAttributes[] | null;
   disableCreatePost?: boolean;
   inline?: boolean;
-  feedUserId?: string[];
+  feedUserId?: string;
+  communityId?: number;
 }) {
-  const supabase = createClient();
   const [posts, setPosts] = useState<PostWithAttributes[]>(initalPosts || []);
 
   useEffect(() => {
+    const supabase = createClient();
+
     const postChannel = supabase
       .channel("public:post")
       .on(
@@ -415,13 +413,18 @@ export default function Feed({
           if (payload.eventType === "INSERT") {
             console.log("New post incoming!", payload.new);
 
-            if (
-              !feedUserId.length ||
-              (feedUserId && feedUserId.includes(payload.new.creator))
-            ) {
+            if (feedUserId && feedUserId == payload.new.creator) {
+              console.log("New post was uploaded in the user's feed");
               setPosts((prev) => [payload.new as PostWithAttributes, ...prev]);
-            } else
-              console.log("New post was uploaded, but not by the feed user");
+            } else if (communityId && communityId == payload.new.community) {
+              console.log("Community post was uploaded");
+              setPosts((prev) => [payload.new as PostWithAttributes, ...prev]);
+            } else {
+              console.log(
+                "New post was uploaded, but not in the community and not in a user feed",
+              );
+              setPosts((prev) => [payload.new as PostWithAttributes, ...prev]);
+            }
           }
         },
       )
@@ -534,7 +537,7 @@ export default function Feed({
       supabase.removeChannel(postImageChannel);
       supabase.removeChannel(postCommentChannel);
     };
-  }, [supabase]);
+  }, [feedUserId, communityId]);
 
   if (!posts || posts.length === 0)
     return (
@@ -545,7 +548,7 @@ export default function Feed({
         )}
       >
         There are no posts yet. Create one!
-        {!disableCreatePost && <CreatePost />}
+        {!disableCreatePost && <CreatePost communityId={communityId} />}
       </div>
     );
 
@@ -567,7 +570,7 @@ export default function Feed({
         ))}
       </ScrollArea>
 
-      {!disableCreatePost && <CreatePost />}
+      {!disableCreatePost && <CreatePost communityId={communityId} />}
     </div>
   );
 }
