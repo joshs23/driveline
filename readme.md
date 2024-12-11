@@ -1,3 +1,7 @@
+# For Professor
+I've attached the contents of the env file required for the project to run in the submission, just create a .env.local file in the project's root (/) directory and paste the contents.
+
+# For Everyone
 ## Running the Project in Development Mode
 
 First, run the development server:
