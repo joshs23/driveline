@@ -54,7 +54,7 @@ export default async function Page({
         <div className="relative">
           <UserPage username={username} />
         </div>
-        <div className="grid h-0 w-full grow grid-cols-11 py-4">
+        <div className="grid h-screen w-full grow grid-cols-11 py-4">
           <div className="col-span-3 flex w-full flex-col gap-4 overflow-y-auto border-r">
             <Vehicles username={username} />
           </div>
