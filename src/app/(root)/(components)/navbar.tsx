@@ -15,16 +15,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import SignOut from "@/app/(root)/(components)/sign-out";
 import CreatePost from "./create-post";
 import UserButtonDetails from "./user-button";
+import { Button } from "@/components/ui/button";
 
 const routes = [
   { name: "Home", href: "/" },
   { name: "Communities", href: "/communities" },
   /* { name: "Marketplace", href: "/marketplace" }, */ // Lost a group member, so this feature was scrapped
-  /* { name: "Following", href: "/following" }, */
 ];
-
-const projectId =
-  process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
 
 async function UserButton() {
   const supabase = await createClient();
@@ -65,6 +62,8 @@ async function UserButton() {
 }
 
 export default async function Navbar() {
+  const userButtonElement = await UserButton();
+
   return (
     <nav className="flex flex-col items-center justify-between gap-4 border-r-2 p-4 shadow-xl">
       <div className="flex min-w-64 flex-col items-center gap-4">
@@ -81,12 +80,10 @@ export default async function Navbar() {
 
         <div className="flex w-full flex-col">
           {routes.map((route) => (
-            <Link
-              key={route.name}
-              href={route.href}
-              className="w-full py-2 text-center text-xl font-medium transition-all hover:bg-primary hover:text-primary-foreground"
-            >
-              {route.name}
+            <Link key={route.name} href={route.href} passHref legacyBehavior>
+              <Button className="w-full rounded-none bg-transparent py-6 text-center text-xl font-medium text-white transition-all hover:bg-primary/20 hover:text-red-300">
+                {route.name}
+              </Button>
             </Link>
           ))}
         </div>
@@ -107,7 +104,7 @@ export default async function Navbar() {
           </div>
         }
       >
-        <UserButton />
+        {userButtonElement}
       </Suspense>
     </nav>
   );
