@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,20 +22,10 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Description } from "@radix-ui/react-dialog";
-
-async function getUser() {
-  const supabase = createClient();
-  const { data, error } = await supabase.auth.getUser();
-  if (error) {
-    console.error("Error getting user:", error);
-  }
-  return data;
-}
+import { Textarea } from "@/components/ui/textarea";
 
 async function insertVehicle(community: z.infer<typeof formSchema>) {
   const supabase = createClient();
-  const user = await getUser();
   const { data, error } = await supabase
     .from("Community")
     .insert([
@@ -78,11 +67,13 @@ export default function CreateCommunity() {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Plus className="size-9 cursor-pointer rounded-full bg-primary p-2 text-primary-foreground shadow-md transition-colors hover:bg-primary/60" />
+        <Button className="size-9 rounded-full p-2 shadow-md transition-colors">
+          <Plus />
+        </Button>
       </DialogTrigger>
       <DialogContent className="w-1/3">
         <DialogHeader>
-          <DialogTitle className="scroll-m-20 text-xl font-extrabold tracking-tight lg:text-2xl">
+          <DialogTitle className="scroll-m-20 text-2xl font-bold tracking-tight lg:text-3xl">
             Make a New Community
           </DialogTitle>
         </DialogHeader>
@@ -116,12 +107,11 @@ export default function CreateCommunity() {
                     Description<span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <textarea
-                      className="min-h-[100px] w-full rounded-md border border-gray-300 bg-background p-2 text-sm text-foreground shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                      placeholder="Brief description of the community"
+                    <Textarea
+                      placeholder="A brief description of the community."
                       required
-                      {...field}
                       rows={3}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -130,10 +120,7 @@ export default function CreateCommunity() {
             />
 
             {/* Submit Button */}
-            <Button
-              type="submit"
-              className="w-full transition-colors hover:bg-primary/60"
-            >
+            <Button type="submit" className="w-full">
               Submit
             </Button>
           </form>
