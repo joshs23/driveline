@@ -62,14 +62,12 @@ export default async function Page({
             <h1 className="px-6 pt-4 text-center text-3xl font-bold">Feed</h1>
             <Feed
               initalPosts={formattedData}
-              feedUserId={[user.user_id]}
+              feedUserId={user.user_id}
               disableCreatePost
               inline
             />
           </div>
           <div className="col-span-3 flex w-full flex-col gap-4 overflow-y-auto border-r">
-            <FriendsList username={username} />
-            <FriendsList username={username} />
             <FriendsList username={username} />
           </div>
         </div>
