@@ -1,9 +1,8 @@
-import Navbar from "@/app/(root)/(components)/navbar";
-import RelationshipBar from "@/app/(root)/(components)/relationship-bar";
 import { Button } from "@/components/ui/button";
 import { House } from "lucide-react";
 import Link from "next/link";
 
+// This is the 404 page for when a user is not found
 export default function NotFound() {
   return (
     <div className="flex size-full min-h-screen grow flex-col items-center justify-center">

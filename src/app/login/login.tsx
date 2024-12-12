@@ -26,11 +26,13 @@ import { createClient } from "@/utils/supabase/client";
 import { LoaderCircle } from "lucide-react";
 import Image from "next/image";
 
+// New user login form rules
 const formSchema = z.object({
   email: z.string(),
   password: z.string(),
 });
 
+// Login page
 export default function Login() {
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
@@ -43,6 +45,7 @@ export default function Login() {
     },
   });
 
+  // Handle form submission
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
     const supabase = createClient();
@@ -61,6 +64,7 @@ export default function Login() {
     setLoading(false);
   }
 
+  // Render the login form
   return (
     <div className="flex min-h-screen flex-col items-center justify-center">
       <Form {...form}>

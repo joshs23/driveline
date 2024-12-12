@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/client";
 import { redirect } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 
+// A component to sign out the user and redirect to the login page
 export default function SignOut({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const supabase = createClient();

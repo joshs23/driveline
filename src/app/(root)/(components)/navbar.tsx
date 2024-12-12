@@ -1,3 +1,9 @@
+/*
+ * navbaris the side navigation bar for the website. It contains the logo, 
+ * links to the home page, communities page, and marketplace page. 
+ * It also contains a create post button and a user button that allows you to view your profile or log out. 
+*/
+
 import Image from "next/image";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
@@ -7,7 +13,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { createClient } from "@/utils/supabase/server";
 import { Suspense } from "react";
@@ -23,6 +28,8 @@ const routes = [
   /* { name: "Marketplace", href: "/marketplace" }, */ // Lost a group member, so this feature was scrapped
 ];
 
+// UserButton is a component with user's info that returns a dropdown menu with 
+// a link to your profile and a sign out button
 async function UserButton() {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
@@ -44,6 +51,7 @@ async function UserButton() {
 
   return (
     <DropdownMenu>
+      {/* UserButtonDetails contains avatar, display name and username from user-button.tsx */}
       <UserButtonDetails />
       <DropdownMenuContent>
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
@@ -61,11 +69,15 @@ async function UserButton() {
   );
 }
 
+/*
+  * Main export is the navbar component that is fixed to the left with w-64
+  */
 export default async function Navbar() {
   const userButtonElement = await UserButton();
 
   return (
-    <nav className="h-screen fixed top-0 left-0 w-64 flex flex-col items-center justify-between gap-4 border-r-2 p-4 shadow-xl">
+    <nav className="h-screen fixed top-0 left-0 w-64 flex flex-col items-center 
+                    justify-between gap-4 border-r-2 p-4 shadow-xl">
       <div className="flex flex-col items-center gap-4">
         <div className="w-56 p-2">
           <Image
@@ -79,9 +91,11 @@ export default async function Navbar() {
         <Separator className="mx-auto h-[2px] w-[60%] rounded-lg shadow-xl" />
 
         <div className="flex w-full flex-col">
+          {/* all links to included routes */}
           {routes.map((route) => (
             <Link key={route.name} href={route.href} passHref legacyBehavior>
-              <Button className="w-full rounded-none bg-transparent py-6 text-center text-xl font-medium text-white transition-all hover:bg-primary/20 hover:text-red-300">
+              <Button className="w-full rounded-none bg-transparent py-6 text-center text-xl font-medium 
+                               text-white transition-all hover:bg-primary/20 hover:text-red-300">
                 {route.name}
               </Button>
             </Link>

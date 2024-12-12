@@ -7,12 +7,13 @@ import { LoaderCircle } from "lucide-react";
 import { notFound, redirect, usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button"; // Adjust the import path as necessary
+import { Button } from "@/components/ui/button";
 import { IconFriends } from "@tabler/icons-react";
 
 const projectId =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
 
+// sanitizes a file name to be used as an object key
 export function sanitizeFileName(fileName: string): string {
   const sanitized = fileName
     .replace(/[^a-zA-Z0-9!\-_.*'()]/g, "_") // Only allow permitted characters
@@ -27,6 +28,7 @@ export function sanitizeFileName(fileName: string): string {
   return sanitized;
 }
 
+// Get the currently authenticated user
 async function getCurrentUser() {
   const supabase = createClient();
   const { data, error } = await supabase.auth.getUser();
@@ -36,30 +38,33 @@ async function getCurrentUser() {
   return data;
 }
 
+// User Page Banner
 function Banner({ userDetails }: { userDetails: Tables<"UserProfile"> }) {
   const [currentUserId, setCurrentUserId] = useState<string>();
-  //const [bannerImage, setBannerImage] = useState<File>();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pathname = usePathname();
   const queryClient = useQueryClient();
 
+  // Get the current user and set the current user id
   useEffect(() => {
     getCurrentUser().then((data) => setCurrentUserId(data?.user?.id));
   }, []);
 
   const handleBannerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files) return;
-    //setBannerImage(event.target.files?.[0]);
     uploadBanner(event.target.files[0]);
   };
 
+  // Upload a new banner image
   async function uploadBanner(bannerImage: File) {
     if (!bannerImage) return;
 
+    // Show a loading toast
     const toastId = toast.loading("Uploading new banner...", {
       position: "top-right",
     });
 
+    // Upload the image to the storage bucket
     const supabase = createClient();
     const { data: imageData, error } = await supabase.storage
       .from("avatars")
@@ -79,6 +84,7 @@ function Banner({ userDetails }: { userDetails: Tables<"UserProfile"> }) {
       return;
     }
 
+    // Update the user's profile with the new banner image
     if (imageData) {
       await supabase
         .from("UserProfile")
@@ -93,10 +99,12 @@ function Banner({ userDetails }: { userDetails: Tables<"UserProfile"> }) {
       className: "bg-green-600",
     });
 
+    // Invalidate the user profile queries cache
     queryClient.invalidateQueries({
       queryKey: ["username", userDetails.username],
     });
 
+    // Invalidate the user id queries cache
     queryClient.invalidateQueries({
       queryKey: ["user_id", userDetails.user_id],
     });
@@ -106,6 +114,7 @@ function Banner({ userDetails }: { userDetails: Tables<"UserProfile"> }) {
     redirect(pathname);
   }
 
+  // Render the banner image or a placeholder if there is no banner image
   return (
     <div
       className={cn(
@@ -140,6 +149,7 @@ function Banner({ userDetails }: { userDetails: Tables<"UserProfile"> }) {
   );
 }
 
+// User Page Profile Picture
 function ProfilePicture({
   userDetails,
 }: {
@@ -150,6 +160,7 @@ function ProfilePicture({
   const pathname = usePathname();
   const queryClient = useQueryClient();
 
+  // Get the current user and set the current user id
   useEffect(() => {
     getCurrentUser().then((data) => setCurrentUserId(data?.user?.id));
   }, []);
@@ -159,13 +170,16 @@ function ProfilePicture({
     uploadAvatar(event.target.files[0]);
   };
 
+  // Upload a new avatar image
   async function uploadAvatar(avatarImage: File) {
     if (!avatarImage) return;
 
+    // Show a loading toast
     const toastId = toast.loading("Uploading new avatar...", {
       position: "top-right",
     });
 
+    // Upload the image to the storage bucket
     const supabase = createClient();
     const { data: imageData, error } = await supabase.storage
       .from("avatars")
@@ -185,6 +199,7 @@ function ProfilePicture({
       return;
     }
 
+    // Update the user's profile with the new avatar image
     if (imageData) {
       await supabase
         .from("UserProfile")
@@ -212,6 +227,7 @@ function ProfilePicture({
     redirect(pathname);
   }
 
+  // Render the profile picture or a placeholder if there is no profile picture
   return (
     <div
       className={cn(
@@ -239,7 +255,8 @@ function ProfilePicture({
           className="h-full w-full rounded-full border-4 border-border bg-secondary object-cover shadow-md"
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center rounded-full border-4 border-border bg-secondary font-semibold shadow-md">
+        <div className="flex h-full w-full items-center justify-center rounded-full border-4 
+                        border-border bg-secondary font-semibold shadow-md">
           No Profile Pic
         </div>
       )}
@@ -247,6 +264,7 @@ function ProfilePicture({
   );
 }
 
+// User Page
 export default function UserPage({ username }: { username: string }) {
   const [currentUserId, setCurrentUserId] = useState<string>();
   const [friendRequestStatus, setFriendRequestStatus] = useState<string>();
@@ -256,10 +274,12 @@ export default function UserPage({ username }: { username: string }) {
     message: "",
   });
 
+  // Get the current user and set the current user id
   useEffect(() => {
     getCurrentUser().then((data) => setCurrentUserId(data?.user?.id));
   }, []);
 
+  // Get the user details for the given username
   const { isPending, data: userDetails } = useQuery({
     queryKey: ["username", username],
     queryFn: async () => {
@@ -276,6 +296,7 @@ export default function UserPage({ username }: { username: string }) {
     },
   });
 
+  // Check the friend request status between the current user and the user being viewed
   useEffect(() => {
     if (currentUserId && userDetails?.user_id) {
       const supabase = createClient();
@@ -289,12 +310,14 @@ export default function UserPage({ username }: { username: string }) {
             console.error("Error fetching friend request status:", error);
             return;
           }
+          // If there is a friend request, set the status to pending or accepted
           if (data.length > 0) {
             if (data[0].accepted) {
               setFriendRequestStatus("accepted");
             } else {
               setFriendRequestStatus("pending");
             }
+          // If there is no friend request, check the inverse relationship as well
           } else {
             supabase
               .from("Friends")
@@ -306,6 +329,7 @@ export default function UserPage({ username }: { username: string }) {
                   console.error("Error fetching friend request status:", error);
                   return;
                 }
+                // If there is a friend request, set the status to pending or accepted
                 if (data.length > 0) {
                   if (data[0].accepted) {
                     setFriendRequestStatus("accepted");
@@ -321,6 +345,7 @@ export default function UserPage({ username }: { username: string }) {
     }
   }, [currentUserId, userDetails, friendRequestStatus]);
 
+  // Set the friend button status based on the friend request status
   useEffect(() => {
     if (friendRequestStatus === "accepted") {
       setShowFriendButton({ show: false, color: "", message: "" });
@@ -337,11 +362,13 @@ export default function UserPage({ username }: { username: string }) {
         message: "Add Friend",
       });
     }
+    // If the user is viewing their own profile, hide the friend button
     if (currentUserId == userDetails?.user_id) {
       setShowFriendButton({ show: false, color: "", message: "" });
     }
   }, [friendRequestStatus]);
 
+  // if the query is pending, show a loading spinner
   if (isPending)
     return (
       <div className="flex min-h-screen w-full items-center justify-center">
@@ -351,6 +378,7 @@ export default function UserPage({ username }: { username: string }) {
 
   if (!userDetails) notFound();
 
+  // Send a friend request to the user being viewed
   const requestFriend = (userDetails: Tables<"UserProfile">) => async () => {
     const supabase = createClient();
     const { data, error } = await supabase
@@ -368,11 +396,13 @@ export default function UserPage({ username }: { username: string }) {
       console.error("Error sending friend request:", error);
       return;
     } else {
+      // Show a success toast and set the friend request status to pending
       toast.success("Friend request sent!");
       setFriendRequestStatus("pending");
     }
   };
 
+  // Render the user page with the user's details
   return (
     <div className="max-h-full w-full overflow-clip">
       {/* Header Section */}
@@ -384,6 +414,7 @@ export default function UserPage({ username }: { username: string }) {
       <div className="mt-20 text-center">
         <h1 className="text-2xl font-semibold">{userDetails.display_name}</h1>
         <p className="text-lg">@{username}</p>
+        {/* Show the friend button if users are not already friends */}
         {showFriendButton.show ? (
           <div className="pt-2">
             <Button
@@ -393,7 +424,7 @@ export default function UserPage({ username }: { username: string }) {
                   ? requestFriend(userDetails)
                   : () => {}
               }
-            >
+            >{/* Show the appropriate message on the friend button */}
               <IconFriends /> {showFriendButton.message}
             </Button>
           </div>

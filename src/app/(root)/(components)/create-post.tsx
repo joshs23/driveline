@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { sanitizeFileName } from "../user/[username]/user-page";
 
+// Insert a new post into the Post table
 async function insertPost(content: string, communityId?: number) {
   const supabase = createClient();
 
@@ -55,6 +56,7 @@ async function insertPost(content: string, communityId?: number) {
   return postData;
 }
 
+// New post form rules
 const formSchema = z.object({
   content: z
     .string()
@@ -67,6 +69,7 @@ const formSchema = z.object({
   images: z.array(z.instanceof(File)).optional(),
 });
 
+// Component to display a list of the user's vehicles - scrapped for now to save time
 function VehicleTagging() {
   const supabase = createClient();
 
@@ -113,6 +116,9 @@ function VehicleTagging() {
   );
 }
 
+// Component to create a new post, starts as a button that opens a dialog modal to 
+// write/submit post contents including body and images
+// can optionally take a communityId to associate the post with a community
 export default function CreatePost({
   inFlow,
   communityId,
@@ -145,6 +151,8 @@ export default function CreatePost({
     if (values.images) {
       setProgress(-1);
 
+      // Fake progress bar to show users their images are uploading, 
+      // adds a random amount of progress every 300-600ms until 98%
       const fakeInterval = setInterval(
         () => {
           setProgress((oldProgress) => {
@@ -159,6 +167,7 @@ export default function CreatePost({
         Math.floor(Math.random() * (600 - 300) + 300),
       );
 
+      // Upload each image to the storage bucket
       const imagePromises = values.images.map((image, i) => {
         const storagePromise = supabase.storage
           .from("feed")
@@ -172,6 +181,7 @@ export default function CreatePost({
 
       const imageUploads = await Promise.all(imagePromises);
 
+      // Insert each image into the PostImage table
       for (const imageUpload of imageUploads) {
         const { data, error } = imageUpload;
 
@@ -190,6 +200,7 @@ export default function CreatePost({
         }
       }
 
+      // Finish the progress bar and clear the interval
       clearInterval(fakeInterval);
 
       setProgress(100);
@@ -210,7 +221,8 @@ export default function CreatePost({
         <Button
           className={cn(
             !inFlow && "absolute bottom-4 right-4",
-            "flex items-center rounded-lg border-b-[1px] border-b-red-400 px-4 py-6 text-2xl font-bold shadow-md transition-all hover:-translate-y-[2px] hover:border-b-[3px] hover:bg-primary/20",
+            "flex items-center rounded-lg border-b-[1px] border-b-red-400 px-4 py-6 text-2xl font-bold",
+            "shadow-md transition-all hover:-translate-y-[2px] hover:border-b-[3px] hover:bg-primary/20"
           )}
         >
           <Plus className="mr-2 size-8 cursor-pointer" />
@@ -259,7 +271,8 @@ export default function CreatePost({
 
             <Button
               type="submit"
-              className="h-20 w-full rounded-md border-b-[4px] border-red-400 text-xl transition-all hover:-translate-y-[2px] hover:border-b-[6px] hover:bg-primary/20 [&_svg]:size-10"
+              className="h-20 w-full rounded-md border-b-[4px] border-red-400 text-xl 
+              transition-all hover:-translate-y-[2px] hover:border-b-[6px] hover:bg-primary/20 [&_svg]:size-10"
             >
               {(loading && <IconLoader2 className="animate-spin" />) ||
                 "Create Post"}

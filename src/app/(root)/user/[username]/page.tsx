@@ -5,6 +5,7 @@ import Feed from "../../feed";
 import { notFound } from "next/navigation";
 import FriendsList from "./friends-list";
 
+// Page for the user profile gets the username from the route and fetches the user's information
 export default async function Page({
   params,
 }: {
@@ -12,6 +13,7 @@ export default async function Page({
 }) {
   const { username } = await params;
 
+  // if for some reason there is no username in the route, return a message
   if (!username)
     return (
       <div className="flex min-h-screen w-full items-center justify-center">
@@ -21,6 +23,7 @@ export default async function Page({
 
   const supabase = await createClient();
 
+  // Fetch the user's profile
   const { data: user, error: userError } = await supabase
     .from("UserProfile")
     .select("*")
@@ -32,6 +35,7 @@ export default async function Page({
     return notFound();
   }
 
+  // Fetch the user's posts
   const { data, error } = await supabase
     .from("Post")
     .select("*, PostImage(*), Comment(*)")
@@ -48,12 +52,16 @@ export default async function Page({
       Comment: Array.isArray(post.Comment) ? post.Comment : [],
     })) || null;
 
+  // Return the user page with the user's information and posts
   return (
     <>
+      {/* Header with banner image, profile pic and user info */}
       <main className="flex w-full flex-col bg-secondary">
         <div className="relative">
           <UserPage username={username} />
         </div>
+        {/* The rest is in three columns the height of the screen so users can scroll down and get a larger view 
+        of user's content (initially blocked by the banner and profile pic header)*/}
         <div className="grid h-screen w-full grow grid-cols-11 py-4">
           <div className="col-span-3 flex w-full flex-col gap-4 overflow-y-auto border-r">
             <Vehicles username={username} />

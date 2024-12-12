@@ -1,3 +1,10 @@
+/*
+ * UserButtonDetails fetches the current user's profile details from Supabase
+ * and displays them in a dropdown menu trigger. 
+ * It shows the user's avatar, display name, and username.
+ * It is used in the navbar to display the user's profile details.
+ */
+
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";

@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { CircleAlert } from "lucide-react";
 
+// This is the error notifier for when an error occurs
 export default function Error({
   error,
   reset,

@@ -1,11 +1,14 @@
 import { createClient } from "@/utils/supabase/server";
 import { notFound } from "next/navigation";
 
+// Page for the vehicle details unused in the starter app, for now just displays the vehicle details based on the id
+// only accessible by typing URL directly
 export default async function VehiclePage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  // Get the vehicle id from the params
   const { id } = await params;
   const supabase = await createClient();
   const { data: vehicleData } = await supabase
@@ -18,6 +21,7 @@ export default async function VehiclePage({
 
   if (!vehicleData) return notFound();
 
+  // Return the vehicle details
   return (
     <div className="container mx-auto py-8">
       {vehicleData && (

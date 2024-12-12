@@ -22,11 +22,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+// PostWithAttributes is a type that extends the Post table with the PostImage and Comment tables
 type PostWithAttributes = Tables<"Post"> & {
   PostImage?: Tables<"PostImage">[];
   Comment?: Tables<"Comment">[];
 };
 
+// Create a new comment in the Comment table
 async function createComment(body: string, post_id: number, author_id: string) {
   const supabase = createClient();
   const { data, error } = await supabase.from("Comment").insert([
@@ -46,6 +48,7 @@ async function createComment(body: string, post_id: number, author_id: string) {
 const projectId =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1].split(".")[0];
 
+// Form rules for the comment form
 const formSchema = z.object({
   body: z
     .string()
@@ -57,6 +60,7 @@ const formSchema = z.object({
     }),
 });
 
+// CommentSection is a component that displays the comments for a post and allows users to create new comments
 function CommentSection({ post }: { post: PostWithAttributes }) {
   const supabase = createClient();
 
@@ -69,6 +73,7 @@ function CommentSection({ post }: { post: PostWithAttributes }) {
 
   const [isCommenting, setIsCommenting] = useState(0);
 
+  // Get the author details for the comments
   const {
     data: commentAuthorData,
     isError: isCommentError,
@@ -87,6 +92,7 @@ function CommentSection({ post }: { post: PostWithAttributes }) {
     },
   });
 
+  // Get the current user details
   const {
     data: currentUserData,
     isError: isCurrentUserError,
@@ -110,10 +116,12 @@ function CommentSection({ post }: { post: PostWithAttributes }) {
     },
   });
 
+  // Focus on the comment input when the user clicks on the post
   const focusOnPost = () => {
     setIsCommenting(post.id);
   };
 
+  // Unfocus on the comment input when the user clicks away
   const unfocusOnPost = () => {
     setIsCommenting(0);
   };
@@ -138,6 +146,7 @@ function CommentSection({ post }: { post: PostWithAttributes }) {
       </div>
     );
 
+  // Submit a new comment using createComment
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!currentUserData) return;
 
@@ -145,8 +154,11 @@ function CommentSection({ post }: { post: PostWithAttributes }) {
     form.reset();
   }
 
+  // The comment section underneath each post, first contains any comments and then the comment form
+  // TODO: Add pagination for comments
   return (
     <>
+      {/* Display the comments */}
       {post.Comment && post.Comment?.length > 0 && (
         <>
           {post.Comment.map((comment) => {
@@ -189,7 +201,7 @@ function CommentSection({ post }: { post: PostWithAttributes }) {
           })}
         </>
       )}
-
+      {/* Add a comment form */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="flex flex-col">
@@ -249,6 +261,7 @@ function CommentSection({ post }: { post: PostWithAttributes }) {
   );
 }
 
+// Displays one post in the feed
 function FeedPost({
   post,
   inline,
@@ -259,6 +272,7 @@ function FeedPost({
   const [imageUrl, setImageUrl] = useState<string>();
   const [showImageDialog, setShowImageDialog] = useState(false);
 
+  // Get the author details for the post
   const {
     data: authorData,
     isError: isAuthorError,
@@ -279,6 +293,7 @@ function FeedPost({
     },
   });
 
+  // Handle when the user clicks on an image in the post
   function handleImageClick(url: string) {
     setImageUrl(url);
     setShowImageDialog(true);
@@ -294,6 +309,7 @@ function FeedPost({
       </div>
     );
 
+  // The post component displays the post body, images, and comments
   return (
     <>
       <div
@@ -378,6 +394,8 @@ function FeedPost({
   );
 }
 
+// Feed is the main component that displays the feed of all posts, it needs to be passed the initial posts 
+// in order for the realtime updates to work
 export default function Feed({
   initalPosts,
   disableCreatePost,
@@ -393,9 +411,11 @@ export default function Feed({
 }) {
   const [posts, setPosts] = useState<PostWithAttributes[]>(initalPosts || []);
 
+  // subscribe to realtime updates for posts, post images, and comments
   useEffect(() => {
     const supabase = createClient();
 
+    // subscribe to the post channel
     const postChannel = supabase
       .channel("public:post")
       .on(
@@ -430,6 +450,7 @@ export default function Feed({
       )
       .subscribe();
 
+    // subscribe to the post image channel
     const postImageChannel = supabase
       .channel("public:postimage")
       .on(
@@ -473,6 +494,7 @@ export default function Feed({
       )
       .subscribe();
 
+    // subscribe to the comment channel
     const postCommentChannel = supabase
       .channel("public:comment")
       .on(
@@ -533,12 +555,14 @@ export default function Feed({
       .subscribe();
 
     return () => {
+      // cleanup the channels when the component is unmounted to avoid unnecessary updates
       supabase.removeChannel(postChannel);
       supabase.removeChannel(postImageChannel);
       supabase.removeChannel(postCommentChannel);
     };
   }, [feedUserId, communityId]);
 
+  // If there are no posts, display a message to create a post
   if (!posts || posts.length === 0)
     return (
       <div
@@ -552,6 +576,7 @@ export default function Feed({
       </div>
     );
 
+  // Display the posts in the feed and the create post form if the disableCreatePost prop is not set
   return (
     <div
       className={cn(
